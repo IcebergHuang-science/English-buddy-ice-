@@ -81,7 +81,7 @@
     }
 
     .container {
-      max-width: 820px;
+      max-width: 880px;
       margin: 0 auto;
       padding: 16px;
     }
@@ -120,7 +120,7 @@
       justify-content: space-between;
       align-items: center;
       gap: 10px;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
       background: white;
       padding: 12px 16px;
       border-radius: 18px;
@@ -149,6 +149,23 @@
       color: white;
     }
 
+    .top-right-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .picker-toggle-btn {
+      background: #FEF3C7;
+      border: 2px solid #F59E0B;
+      color: #92400E;
+      padding: 9px 14px;
+      border-radius: 14px;
+      font-weight: bold;
+      font-size: 0.95rem;
+      cursor: pointer;
+    }
+
     .gen-btn {
       background: linear-gradient(135deg, #8B5CF6, #EC4899);
       color: white;
@@ -156,7 +173,7 @@
       padding: 10px 16px;
       border-radius: 14px;
       font-weight: bold;
-      font-size: 0.98rem;
+      font-size: 0.95rem;
       cursor: pointer;
       box-shadow: 0 4px 10px rgba(139, 92, 246, 0.3);
     }
@@ -164,6 +181,108 @@
     .gen-btn:disabled {
       opacity: 0.6;
       cursor: not-allowed;
+    }
+
+    /* 30-Topic Picker Grid Card */
+    .topic-picker-card {
+      background: white;
+      border-radius: 22px;
+      padding: 18px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+      border: 2px solid #FDE68A;
+    }
+
+    .topic-picker-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .topic-picker-header h2 {
+      margin: 0;
+      font-size: 1.1rem;
+      color: #1E293B;
+    }
+
+    .topic-search-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .topic-search-input {
+      flex: 1;
+      padding: 8px 14px;
+      border: 2px solid #E2E8F0;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    .topic-search-input:focus {
+      border-color: var(--secondary);
+    }
+
+    .topic-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      max-height: 310px;
+      overflow-y: auto;
+      padding: 4px;
+    }
+
+    @media (min-width: 640px) {
+      .topic-grid {
+        grid-template-columns: repeat(5, 1fr);
+      }
+    }
+
+    .topic-chip {
+      background: #F8FAFC;
+      border: 2px solid #E2E8F0;
+      border-radius: 16px;
+      padding: 10px 6px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.18s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .topic-chip:hover {
+      border-color: var(--secondary);
+      background: #F0F9FF;
+    }
+
+    .topic-chip.selected {
+      border-color: var(--primary);
+      background: #FFF3E8;
+      box-shadow: 0 4px 12px rgba(255, 138, 61, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .topic-chip .t-emoji {
+      font-size: 1.75rem;
+      line-height: 1.1;
+    }
+
+    .topic-chip .t-zh {
+      font-weight: 800;
+      font-size: 0.9rem;
+      color: #1E293B;
+    }
+
+    .topic-chip .t-en {
+      font-size: 0.74rem;
+      color: var(--muted);
+      line-height: 1.2;
     }
 
     /* 7-Step Progress Indicator */
@@ -258,6 +377,8 @@
       margin-bottom: 14px;
       font-size: 0.95rem;
       color: var(--muted);
+      flex-wrap: wrap;
+      gap: 8px;
     }
 
     .badge {
@@ -648,10 +769,25 @@
   <div id="viewToday">
     <div class="top-bar">
       <div class="mode-switch">
-        <button class="mode-btn active" id="btnModeDialog" onclick="switchMode('dialogue')">💬 日常情境對話</button>
-        <button class="mode-btn" id="btnModeStory" onclick="switchMode('story')">📖 經典童話朗讀</button>
+        <button class="mode-btn active" id="btnModeDialog" onclick="switchMode('dialogue')">💬 日常情境 (30種)</button>
+        <button class="mode-btn" id="btnModeStory" onclick="switchMode('story')">📖 經典童話 (30篇)</button>
       </div>
-      <button class="gen-btn" id="btnGenerate" onclick="generateNewDailyLesson()">✨ AI 生成新內容</button>
+      <div class="top-right-actions">
+        <button class="picker-toggle-btn" id="btnTogglePicker" onclick="toggleTopicPicker()">📋 收合主題選單</button>
+        <button class="gen-btn" id="btnGenerate" onclick="generateNewDailyLesson()">✨ AI 生成此主題新內容</button>
+      </div>
+    </div>
+
+    <!-- 30-OPTION TOPIC PICKER -->
+    <div class="topic-picker-card" id="topicPickerCard">
+      <div class="topic-picker-header">
+        <h2 id="topicPickerTitle">💬 請挑選 1 種生活情境（共 30 種，點選即可開始練習）</h2>
+      </div>
+      <div class="topic-search-bar">
+        <input type="text" class="topic-search-input" id="topicSearchInput" placeholder="🔍 搜尋主題關鍵字（例如：早餐、動物園、小豬、公主...）" oninput="renderTopicPicker()" />
+        <button class="btn-sub" style="padding:6px 12px;" onclick="clearTopicSearch()">清除</button>
+      </div>
+      <div class="topic-grid" id="topicGrid"></div>
     </div>
 
     <!-- 7-Step Flow Indicator -->
@@ -795,7 +931,7 @@
     </div>
 
     <div class="form-group">
-      <label for="apiKeyInput">🔑 Gemini API Key（用於每日自動生成新對話與童話）</label>
+      <label for="apiKeyInput">🔑 Gemini API Key（用於依所選主題生成全新對話與童話）</label>
       <input type="password" id="apiKeyInput" placeholder="貼上 AIzaSy... 金鑰" />
       <small style="color:var(--muted);">所有金鑰僅儲存在此台平板/電腦的瀏覽器本機中，不會上傳至其他伺服器。</small>
     </div>
@@ -809,7 +945,616 @@
 
 <script>
   // ==========================================
-  // 1. DEFAULT KINDERGARTEN LESSONS & STORAGE
+  // 1. 30 DIALOGUE SCENARIOS & 30 FAIRY TALES
+  // ==========================================
+  const DIALOGUE_TOPICS = [
+    {
+      id: "d1", emoji: "🥞", zh: "1. 早餐時間", en: "Breakfast Time",
+      lines: [
+        { speaker: "Mom", avatar: "👩", en: "Good morning! Are you hungry?", zh: "早安！你肚子餓了嗎？" },
+        { speaker: "Kid", avatar: "🧒", en: "Yes, I am very hungry!", zh: "是的，我好餓喔！" },
+        { speaker: "Mom", avatar: "👩", en: "Do you want milk or juice?", zh: "你想要牛奶還是果汁？" },
+        { speaker: "Kid", avatar: "🧒", en: "I want warm milk, please.", zh: "請給我溫牛奶。" },
+        { speaker: "Mom", avatar: "👩", en: "Here you are. Yummy!", zh: "給你。好好吃喔！" }
+      ]
+    },
+    {
+      id: "d2", emoji: "🛝", zh: "2. 公園遊樂場", en: "At the Playground",
+      lines: [
+        { speaker: "Kid", avatar: "🧒", en: "Look at the big yellow slide!", zh: "看那個大大的黃色溜滑梯！" },
+        { speaker: "Dad", avatar: "👨", en: "Be careful when you climb up.", zh: "往上爬的時候要小心喔。" },
+        { speaker: "Kid", avatar: "🧒", en: "Whee! That was so fast!", zh: "哇！溜下來好快喔！" },
+        { speaker: "Dad", avatar: "👨", en: "Do you want to swing next?", zh: "接下來你想盪鞦韆嗎？" },
+        { speaker: "Kid", avatar: "🧒", en: "Yes, push me high, Daddy!", zh: "好，爸爸推我高一點！" }
+      ]
+    },
+    {
+      id: "d3", emoji: "🎒", zh: "3. 準備上學去", en: "Going to School",
+      lines: [
+        { speaker: "Mom", avatar: "👩", en: "Time for school! Put on your shoes.", zh: "該上學囉！穿上你的鞋子。" },
+        { speaker: "Kid", avatar: "🧒", en: "Where is my blue backpack?", zh: "我的藍色書包在哪裡？" },
+        { speaker: "Mom", avatar: "👩", en: "It is right next to the door.", zh: "就在門旁邊。" },
+        { speaker: "Kid", avatar: "🧒", en: "I got it! I am ready to go.", zh: "我拿到了！我準備好出發了。" },
+        { speaker: "Mom", avatar: "👩", en: "Have a great day at school!", zh: "祝你在學校度過愉快的一天！" }
+      ]
+    },
+    {
+      id: "d4", emoji: "🍎", zh: "4. 點心與水果", en: "Snack & Fruit Time",
+      lines: [
+        { speaker: "Teacher", avatar: "👩‍🏫", en: "Wash your hands before snack time.", zh: "吃點心前要先洗手喔。" },
+        { speaker: "Kid", avatar: "🧒", en: "My hands are clean now!", zh: "我的手現在乾淨了！" },
+        { speaker: "Teacher", avatar: "👩‍🏫", en: "Would you like some red apples?", zh: "你想吃一點紅蘋果嗎？" },
+        { speaker: "Kid", avatar: "🧒", en: "Yes, please. Apples are sweet.", zh: "好的，謝謝。蘋果甜甜的。" },
+        { speaker: "Teacher", avatar: "👩‍🏫", en: "You are welcome, sweetie.", zh: "不客氣，寶貝。" }
+      ]
+    },
+    {
+      id: "d5", emoji: "🧸", zh: "5. 收拾玩具", en: "Cleaning Up Toys",
+      lines: [
+        { speaker: "Dad", avatar: "👨", en: "Dinner is ready. Let's clean up.", zh: "晚餐準備好了，我們來收拾玩具吧。" },
+        { speaker: "Kid", avatar: "🧒", en: "Okay! I will put blocks in the box.", zh: "好！我把積木放進箱子裡。" },
+        { speaker: "Dad", avatar: "👨", en: "Where does the teddy bear go?", zh: "泰迪熊應該放去哪裡呢？" },
+        { speaker: "Kid", avatar: "🧒", en: "He sits on my bed.", zh: "他坐在我的床上。" },
+        { speaker: "Dad", avatar: "👨", en: "Great job! The room looks neat.", zh: "做得好！房間看起來好整齊。" }
+      ]
+    },
+    {
+      id: "d6", emoji: "🌙", zh: "6. 睡前晚安", en: "Bedtime Routine",
+      lines: [
+        { speaker: "Mom", avatar: "👩", en: "It is dark outside. Time for bed.", zh: "外面天黑了，該睡覺囉。" },
+        { speaker: "Kid", avatar: "🧒", en: "Can we read one story first?", zh: "我們可以先念一個故事嗎？" },
+        { speaker: "Mom", avatar: "👩", en: "Sure! Hop under the warm blanket.", zh: "當然！鑽進溫暖的被窩裡吧。" },
+        { speaker: "Kid", avatar: "🧒", en: "Good night, Mommy. I love you.", zh: "晚安，媽咪，我愛你。" },
+        { speaker: "Mom", avatar: "👩", en: "Sweet dreams, my little star.", zh: "祝你有個甜美的夢，我的小星星。" }
+      ]
+    },
+    {
+      id: "d7", emoji: "🛒", zh: "7. 逛超級市場", en: "At the Supermarket",
+      lines: [
+        { speaker: "Mom", avatar: "👩", en: "Can you help me find yellow bananas?", zh: "你可以幫我找黃色的香蕉嗎？" },
+        { speaker: "Kid", avatar: "🧒", en: "I see them over there!", zh: "我看到它們在那邊！" },
+        { speaker: "Mom", avatar: "👩", en: "Put them gently in the cart.", zh: "把它們輕輕放進推車裡。" },
+        { speaker: "Kid", avatar: "🧒", en: "Can we buy some strawberries too?", zh: "我們也可以買一些草莓嗎？" },
+        { speaker: "Mom", avatar: "👩", en: "Yes, let's pick a fresh box.", zh: "好，我們挑一盒新鮮的吧。" }
+      ]
+    },
+    {
+      id: "d8", emoji: "🦁", zh: "8. 動物園看動物", en: "Visiting the Zoo",
+      lines: [
+        { speaker: "Kid", avatar: "🧒", en: "Look! That giraffe is so tall!", zh: "看！那隻長頸鹿好高喔！" },
+        { speaker: "Dad", avatar: "👨", en: "It is eating green leaves.", zh: "牠正在吃綠色的樹葉。" },
+        { speaker: "Kid", avatar: "🧒", en: "What sound does a lion make?", zh: "獅子會發出什麼聲音？" },
+        { speaker: "Dad", avatar: "👨", en: "A lion says roar very loudly!", zh: "獅子會非常大聲地吼叫！" },
+        { speaker: "Kid", avatar: "🧒", en: "I love seeing all the animals.", zh: "我好喜歡看所有的動物。" }
+      ]
+    },
+    {
+      id: "d9", emoji: "☔", zh: "9. 天氣與穿衣服", en: "Weather & Clothes",
+      lines: [
+        { speaker: "Mom", avatar: "👩", en: "Look out the window. How is the weather?", zh: "看看窗外，今天天氣如何？" },
+        { speaker: "Kid", avatar: "🧒", en: "It is raining and windy today.", zh: "今天在下雨而且風很大。" },
+        { speaker: "Mom", avatar: "👩", en: "Please wear your yellow raincoat.", zh: "請穿上你的黃色雨衣。" },
+        { speaker: "Kid", avatar: "🧒", en: "I will wear my rain boots too!", zh: "我也要穿上我的雨鞋！" },
+        { speaker: "Mom", avatar: "👩", en: "Now you can jump in puddles!", zh: "現在你可以踩水坑囉！" }
+      ]
+    },
+    {
+      id: "d10", emoji: "🪥", zh: "10. 刷牙洗臉", en: "Brushing Teeth",
+      lines: [
+        { speaker: "Dad", avatar: "👨", en: "Let's brush our teeth after dinner.", zh: "吃完晚餐我們來刷牙吧。" },
+        { speaker: "Kid", avatar: "🧒", en: "I put toothpaste on my brush.", zh: "我把牙膏擠在牙刷上了。" },
+        { speaker: "Dad", avatar: "👨", en: "Brush up and down, left and right.", zh: "上下刷一刷，左右刷一刷。" },
+        { speaker: "Kid", avatar: "🧒", en: "Look at my shiny white teeth!", zh: "看我閃亮亮的潔白牙齒！" },
+        { speaker: "Dad", avatar: "👨", en: "Awesome! Now rinse with water.", zh: "太棒了！現在用水漱漱口。" }
+      ]
+    },
+    {
+      id: "d11", emoji: "🤝", zh: "11. 學習分享玩具", en: "Sharing Toys",
+      lines: [
+        { speaker: "Friend", avatar: "👧", en: "Can I play with your red car?", zh: "我可以玩你的紅色小汽車嗎？" },
+        { speaker: "Kid", avatar: "🧒", en: "Yes! Let's take turns together.", zh: "可以呀！我們一起輪流玩吧。" },
+        { speaker: "Friend", avatar: "👧", en: "Thank you! You are very kind.", zh: "謝謝你！你人真好。" },
+        { speaker: "Kid", avatar: "🧒", en: "I will drive the blue truck.", zh: "那我來開這台藍色卡車。" },
+        { speaker: "Friend", avatar: "👧", en: "Sharing makes playtime more fun!", zh: "一起分享讓遊戲變得更好玩！" }
+      ]
+    },
+    {
+      id: "d12", emoji: "🚦", zh: "12. 過馬路安全", en: "Crossing the Street",
+      lines: [
+        { speaker: "Mom", avatar: "👩", en: "Hold my hand near the road.", zh: "靠近馬路時要牽好我的手。" },
+        { speaker: "Kid", avatar: "🧒", en: "The traffic light is red now.", zh: "現在紅綠燈是紅燈。" },
+        { speaker: "Mom", avatar: "👩", en: "We stop and wait on the sidewalk.", zh: "我們停下來在人行道上等。" },
+        { speaker: "Kid", avatar: "🧒", en: "Now the green walking man is on!", zh: "現在綠色小綠人亮起來了！" },
+        { speaker: "Mom", avatar: "👩", en: "Look left and right, then walk.", zh: "先看左邊再看右邊，然後過馬路。" }
+      ]
+    },
+    {
+      id: "d13", emoji: "🚌", zh: "13. 搭公車出遊", en: "Riding the Bus",
+      lines: [
+        { speaker: "Kid", avatar: "🧒", en: "Here comes the big yellow bus!", zh: "大黃色公車開過來了！" },
+        { speaker: "Dad", avatar: "👨", en: "Let's step up and find a seat.", zh: "我們走上車找個座位吧。" },
+        { speaker: "Kid", avatar: "🧒", en: "Can I sit by the window?", zh: "我可以坐在靠窗的位置嗎？" },
+        { speaker: "Dad", avatar: "👨", en: "Sure! Look at the tall trees.", zh: "當然！看看外面高高的樹木。" },
+        { speaker: "Kid", avatar: "🧒", en: "Riding the bus is so exciting!", zh: "搭公車真的好刺激好玩喔！" }
+      ]
+    },
+    {
+      id: "d14", emoji: "🏖️", zh: "14. 在海灘玩沙", en: "At the Beach",
+      lines: [
+        { speaker: "Kid", avatar: "🧒", en: "The ocean water feels cool and nice!", zh: "海水感覺涼涼的好舒服！" },
+        { speaker: "Mom", avatar: "👩", en: "Let's build a big sandcastle together.", zh: "我們一起來蓋一座大沙堡吧。" },
+        { speaker: "Kid", avatar: "🧒", en: "I found a pretty white seashell!", zh: "我找到一個漂亮的白色貝殼！" },
+        { speaker: "Mom", avatar: "👩", en: "Put it on top of the castle.", zh: "把它放在城堡的最上面。" },
+        { speaker: "Kid", avatar: "🧒", en: "Look at our royal sandcastle!", zh: "看我們超棒的皇家沙堡！" }
+      ]
+    },
+    {
+      id: "d15", emoji: "🐄", zh: "15. 農場小動物", en: "On the Farm",
+      lines: [
+        { speaker: "Farmer", avatar: "👨‍🌾", en: "Welcome to my sunny green farm!", zh: "歡迎來到我陽光普照的綠色農場！" },
+        { speaker: "Kid", avatar: "🧒", en: "What does the spotted cow say?", zh: "斑點乳牛會怎麼叫呢？" },
+        { speaker: "Farmer", avatar: "👨‍🌾", en: "The cow says moo! The sheep says baa!", zh: "乳牛會哞哞叫！綿羊會咩咩叫！" },
+        { speaker: "Kid", avatar: "🧒", en: "Look at the cute baby chicks!", zh: "看那些可愛的小雞寶寶！" },
+        { speaker: "Farmer", avatar: "👨‍🌾", en: "You can feed them yellow corn.", zh: "你可以餵牠們吃黃色的玉米。" }
+      ]
+    },
+    {
+      id: "d16", emoji: "🩺", zh: "16. 看醫生檢查", en: "Visiting the Doctor",
+      lines: [
+        { speaker: "Doctor", avatar: "👩‍⚕️", en: "Hello! Let's check your heartbeat today.", zh: "你好！今天我們來聽聽你的心跳吧。" },
+        { speaker: "Kid", avatar: "🧒", en: "The stethoscope feels a little cold!", zh: "聽診器摸起來有一點冰冰的！" },
+        { speaker: "Doctor", avatar: "👩‍⚕️", en: "Open your mouth and say ahh.", zh: "張開嘴巴說「啊——」。" },
+        { speaker: "Kid", avatar: "🧒", en: "Ahhh! Am I healthy, Doctor?", zh: "啊——！醫生，我很健康嗎？" },
+        { speaker: "Doctor", avatar: "👩‍⚕️", en: "Yes! You are super brave and strong.", zh: "是的！你超級勇敢又強壯。" }
+      ]
+    },
+    {
+      id: "d17", emoji: "🎂", zh: "17. 生日派對", en: "Birthday Party",
+      lines: [
+        { speaker: "Friends", avatar: "🥳", en: "Happy birthday to you!", zh: "祝你生日快樂！" },
+        { speaker: "Kid", avatar: "🧒", en: "Look at my chocolate birthday cake!", zh: "看我的巧克力生日蛋糕！" },
+        { speaker: "Mom", avatar: "👩", en: "Make a wish and blow the candles.", zh: "許一個願望然後吹熄蠟燭吧。" },
+        { speaker: "Kid", avatar: "🧒", en: "Whoosh! I blew them all out!", zh: "呼！我把蠟燭全部吹熄了！" },
+        { speaker: "Friends", avatar: "🎁", en: "Hooray! Let's open the presents!", zh: "萬歲！我們來拆禮物吧！" }
+      ]
+    },
+    {
+      id: "d18", emoji: "🎨", zh: "18. 畫畫與著色", en: "Drawing & Coloring",
+      lines: [
+        { speaker: "Teacher", avatar: "👩‍🏫", en: "What are you drawing today?", zh: "你今天在畫什麼呢？" },
+        { speaker: "Kid", avatar: "🧒", en: "I am drawing a big rainbow!", zh: "我正在畫一道大彩虹！" },
+        { speaker: "Teacher", avatar: "👩‍🏫", en: "Pass me the purple crayon, please.", zh: "請把紫色的蠟筆遞給我。" },
+        { speaker: "Kid", avatar: "🧒", en: "Here you go! Let's color the clouds.", zh: "給你！我們來幫雲朵塗顏色吧。" },
+        { speaker: "Teacher", avatar: "👩‍🏫", en: "Your picture is so bright and pretty!", zh: "你的畫作好明亮又漂亮！" }
+      ]
+    },
+    {
+      id: "d19", emoji: "🧹", zh: "19. 幫忙做家事", en: "Helping at Home",
+      lines: [
+        { speaker: "Kid", avatar: "🧒", en: "Mommy, how can I help you today?", zh: "媽咪，我今天可以怎麼幫你呢？" },
+        { speaker: "Mom", avatar: "👩", en: "Can you put spoons on the table?", zh: "你可以把湯匙擺在餐桌上嗎？" },
+        { speaker: "Kid", avatar: "🧒", en: "One, two, three, four spoons ready!", zh: "一、二、三、四支湯匙準備好了！" },
+        { speaker: "Mom", avatar: "👩", en: "You are my best little helper!", zh: "你是我最棒的小幫手！" },
+        { speaker: "Kid", avatar: "🧒", en: "I love helping our family!", zh: "我好喜歡幫忙我們家！" }
+      ]
+    },
+    {
+      id: "d20", emoji: "😊", zh: "20. 心情與情緒", en: "Feelings & Emotions",
+      lines: [
+        { speaker: "Mom", avatar: "👩", en: "You have a big smile! Why are you happy?", zh: "你笑得好開心！為什麼這麼高興呀？" },
+        { speaker: "Kid", avatar: "🧒", en: "I made a new friend at school!", zh: "我在學校交了一個新朋友！" },
+        { speaker: "Mom", avatar: "👩", en: "What do you do when you feel mad?", zh: "當你覺得生氣的時候你會怎麼做？" },
+        { speaker: "Kid", avatar: "🧒", en: "I take three slow deep breaths.", zh: "我會慢慢地深呼吸三次。" },
+        { speaker: "Mom", avatar: "👩", en: "That is a very smart way to calm down!", zh: "那是讓自己冷靜下來非常聰明的方法！" }
+      ]
+    },
+    {
+      id: "d21", emoji: "🔷", zh: "21. 認識顏色形狀", en: "Colors & Shapes",
+      lines: [
+        { speaker: "Dad", avatar: "👨", en: "Can you find something shaped like a circle?", zh: "你可以找到圓形的東西嗎？" },
+        { speaker: "Kid", avatar: "🧒", en: "The round clock on the wall is a circle!", zh: "牆上圓圓的時鐘是圓形的！" },
+        { speaker: "Dad", avatar: "👨", en: "What shape is a slice of pizza?", zh: "一片披薩是什麼形狀的呢？" },
+        { speaker: "Kid", avatar: "🧒", en: "It is a triangle with three sides!", zh: "它是有三條邊的三角形！" },
+        { speaker: "Dad", avatar: "👨", en: "You know all your shapes so well!", zh: "你把所有形狀都認得好清楚！" }
+      ]
+    },
+    {
+      id: "d22", emoji: "🔢", zh: "22. 數數看 1 到 10", en: "Counting 1 to 10",
+      lines: [
+        { speaker: "Teacher", avatar: "👩‍🏫", en: "Let's count our fingers together!", zh: "我們一起來數數看手指頭吧！" },
+        { speaker: "Kid", avatar: "🧒", en: "One, two, three, four, five on one hand!", zh: "一、二、三、四、五，一隻手有五根！" },
+        { speaker: "Teacher", avatar: "👩‍🏫", en: "Now count the other hand up to ten!", zh: "現在接著數另一隻手一直數到十！" },
+        { speaker: "Kid", avatar: "🧒", en: "Six, seven, eight, nine, ten fingers!", zh: "六、七、八、九、十根手指頭！" },
+        { speaker: "Teacher", avatar: "👩‍🏫", en: "Clap ten times for yourself!", zh: "為你自己拍手十下吧！" }
+      ]
+    },
+    {
+      id: "d23", emoji: "👨‍👩‍👧‍👦", zh: "23. 家庭成員介紹", en: "My Family",
+      lines: [
+        { speaker: "Kid", avatar: "🧒", en: "This is a photo of my family.", zh: "這是我家人的照片。" },
+        { speaker: "Teacher", avatar: "👩‍🏫", en: "Who is the tall man in the blue shirt?", zh: "穿著藍色襯衫的高個子男生是誰？" },
+        { speaker: "Kid", avatar: "🧒", en: "That is my Daddy! He tells funny jokes.", zh: "那是我爸爸！他很會講好笑的笑話。" },
+        { speaker: "Teacher", avatar: "👩‍🏫", en: "And who is holding the cute baby?", zh: "那抱著可愛小寶寶的是誰呢？" },
+        { speaker: "Kid", avatar: "🧒", en: "That is my Mommy and my baby sister!", zh: "那是我媽咪和我的小妹妹！" }
+      ]
+    },
+    {
+      id: "d24", emoji: "🐶", zh: "24. 照顧寵物小狗", en: "Caring for a Puppy",
+      lines: [
+        { speaker: "Kid", avatar: "🧒", en: "Look! Our puppy is wagging his tail!", zh: "看！我們的小狗正在搖尾巴！" },
+        { speaker: "Dad", avatar: "👨", en: "Let's fill his bowl with fresh water.", zh: "我們把牠的碗裝滿新鮮的水吧。" },
+        { speaker: "Kid", avatar: "🧒", en: "Sit, Buddy! Good boy, shake hands!", zh: "坐下，巴弟！好乖，握手！" },
+        { speaker: "Dad", avatar: "👨", en: "Give him a small dog treat now.", zh: "現在給牠一小塊狗狗點心吧。" },
+        { speaker: "Kid", avatar: "🧒", en: "Woof! He loves playing fetch with me.", zh: "汪！牠好喜歡跟我玩丟接球。" }
+      ]
+    },
+    {
+      id: "d25", emoji: "💇", zh: "25. 剪頭髮理髮廳", en: "Getting a Haircut",
+      lines: [
+        { speaker: "Stylist", avatar: "✂️", en: "Sit still in the big chair, please.", zh: "請在大大椅子上坐好不要動喔。" },
+        { speaker: "Kid", avatar: "🧒", en: "The water spray tickles my neck!", zh: "噴水霧弄得我脖子癢癢的！" },
+        { speaker: "Stylist", avatar: "✂️", en: "Snip, snip! Almost finished now.", zh: "喀擦、喀擦！現在快剪好囉。" },
+        { speaker: "Kid", avatar: "🧒", en: "Look in the mirror! My hair is neat.", zh: "看鏡子裡！我的頭髮好整齊。" },
+        { speaker: "Mom", avatar: "👩", en: "You look so handsome and cool!", zh: "你看起來好帥氣又酷喔！" }
+      ]
+    },
+    {
+      id: "d26", emoji: "🏊", zh: "26. 泳池學游泳", en: "Swimming Pool",
+      lines: [
+        { speaker: "Coach", avatar: "🏊", en: "Put on your goggles and kick your feet!", zh: "戴上蛙鏡，踢踢你的雙腳！" },
+        { speaker: "Kid", avatar: "🧒", en: "Splash, splash! I am kicking fast!", zh: "嘩啦、嘩啦！我踢得好快！" },
+        { speaker: "Coach", avatar: "🏊", en: "Blow bubbles in the water like a fish.", zh: "像小魚一樣在水裡吐泡泡。" },
+        { speaker: "Kid", avatar: "🧒", en: "Blub, blub! I can float on my back!", zh: "咕嚕、咕嚕！我可以仰漂在水面上了！" },
+        { speaker: "Coach", avatar: "🏊", en: "Super swimmer! High five!", zh: "超級游泳小將！擊掌！" }
+      ]
+    },
+    {
+      id: "d27", emoji: "📚", zh: "27. 圖書館看書", en: "At the Library",
+      lines: [
+        { speaker: "Mom", avatar: "👩", en: "Use your quiet voice inside the library.", zh: "在圖書館裡面要使用輕聲細語喔。" },
+        { speaker: "Kid", avatar: "🧒", en: "I found a picture book about dinosaurs!", zh: "我找到一本關於恐龍的繪本！" },
+        { speaker: "Mom", avatar: "👩", en: "Let's sit on the soft beanbag chair.", zh: "我們坐在軟軟的懶骨頭沙發上吧。" },
+        { speaker: "Kid", avatar: "🧒", en: "Can we borrow three books to take home?", zh: "我們可以借三本書帶回家嗎？" },
+        { speaker: "Mom", avatar: "👩", en: "Yes! Let's scan our library card.", zh: "可以！我們來刷借書證吧。" }
+      ]
+    },
+    {
+      id: "d28", emoji: "🎄", zh: "28. 聖誕節快樂", en: "Merry Christmas",
+      lines: [
+        { speaker: "Kid", avatar: "🧒", en: "Let's hang the shiny star on the tree!", zh: "我們把閃亮的星星掛在聖誕樹上吧！" },
+        { speaker: "Dad", avatar: "👨", en: "Turn on the colorful Christmas lights.", zh: "打開五顏六色的聖誕燈飾。" },
+        { speaker: "Kid", avatar: "🧒", en: "Jingle bells! Santa is coming tonight!", zh: "叮叮噹！聖誕老公公今晚要來了！" },
+        { speaker: "Mom", avatar: "👩", en: "Hang your red stocking by the window.", zh: "把你的紅色聖誕襪掛在窗戶邊。" },
+        { speaker: "Kid", avatar: "🧒", en: "Merry Christmas to everyone!", zh: "祝大家聖誕節快樂！" }
+      ]
+    },
+    {
+      id: "d29", emoji: "🌻", zh: "29. 春天小花園", en: "In the Garden",
+      lines: [
+        { speaker: "Kid", avatar: "🧒", en: "Look at the tiny green sprout!", zh: "看那株小小的綠色嫩芽！" },
+        { speaker: "Grandma", avatar: "👵", en: "Give the thirsty flowers some water.", zh: "給口渴的花朵澆一點水吧。" },
+        { speaker: "Kid", avatar: "🧒", en: "A pretty orange butterfly landed here!", zh: "一隻漂亮的橘色蝴蝶停在這裡！" },
+        { speaker: "Grandma", avatar: "👵", en: "The warm sunshine helps plants grow.", zh: "溫暖的陽光會幫助植物長大。" },
+        { speaker: "Kid", avatar: "🧒", en: "Our garden smells like sweet roses!", zh: "我們的花園聞起來像香甜的玫瑰！" }
+      ]
+    },
+    {
+      id: "d30", emoji: "⚽", zh: "30. 運動與踢足球", en: "Playing Soccer",
+      lines: [
+        { speaker: "Dad", avatar: "👨", en: "Ready to kick the soccer ball?", zh: "準備好踢足球了嗎？" },
+        { speaker: "Kid", avatar: "🧒", en: "Pass the ball to me, Daddy!", zh: "爸爸，把球傳給我！" },
+        { speaker: "Dad", avatar: "👨", en: "Run fast and aim for the goal!", zh: "快跑並瞄準球門！" },
+        { speaker: "Kid", avatar: "🧒", en: "Kick! Goal! I scored a point!", zh: "踢球！進球了！我得了一分！" },
+        { speaker: "Dad", avatar: "👨", en: "What a great kick! Let's drink water.", zh: "踢得太漂亮了！我們來喝口水吧。" }
+      ]
+    }
+  ];
+
+  const STORY_TOPICS = [
+    {
+      id: "s1", emoji: "🐷", zh: "1. 三隻小豬", en: "Three Little Pigs",
+      lines: [
+        { speaker: "Storyteller", avatar: "🐷", en: "Three little pigs built three houses.", zh: "三隻小豬蓋了三棟房子。" },
+        { speaker: "Storyteller", avatar: "🌾", en: "The first pig used yellow straw.", zh: "第一隻小豬用了黃色的稻草。" },
+        { speaker: "Storyteller", avatar: "🪵", en: "The second pig used brown sticks.", zh: "第二隻小豬用了棕色的木棍。" },
+        { speaker: "Storyteller", avatar: "🧱", en: "The third pig used strong red bricks.", zh: "第三隻小豬用了堅固的紅磚頭。" },
+        { speaker: "Storyteller", avatar: "🐺", en: "The big bad wolf could not blow it down!", zh: "大野狼怎麼吹也吹不倒它！" }
+      ]
+    },
+    {
+      id: "s2", emoji: "🐻", zh: "2. 金髮女孩與三隻熊", en: "Goldilocks & Bears",
+      lines: [
+        { speaker: "Storyteller", avatar: "👧", en: "Goldilocks walked into a cozy forest house.", zh: "金髮女孩走進森林裡一棟溫馨的小屋。" },
+        { speaker: "Storyteller", avatar: "🥣", en: "She tasted three bowls of warm porridge.", zh: "她嚐了三碗溫熱的燕麥粥。" },
+        { speaker: "Storyteller", avatar: "🪑", en: "Baby Bear's little chair was just right.", zh: "熊寶寶的小椅子坐起來剛剛好。" },
+        { speaker: "Storyteller", avatar: "🛏️", en: "She fell asleep in the small soft bed.", zh: "她在小小的軟床上睡著了。" },
+        { speaker: "Storyteller", avatar: "🐻", en: "Three bears came home and said hello!", zh: "三隻熊回到家跟她打了招呼！" }
+      ]
+    },
+    {
+      id: "s3", emoji: "🧺", zh: "3. 小紅帽", en: "Little Red Riding Hood",
+      lines: [
+        { speaker: "Storyteller", avatar: "🧣", en: "Little Red Riding Hood wore a red cloak.", zh: "小紅帽穿著一件紅色的斗篷。" },
+        { speaker: "Storyteller", avatar: "🧁", en: "She carried sweet cakes to Grandma's house.", zh: "她提著甜甜的蛋糕要去外婆家。" },
+        { speaker: "Storyteller", avatar: "🌸", en: "She picked pretty flowers along the path.", zh: "她沿著小路採了許多漂亮的花朵。" },
+        { speaker: "Storyteller", avatar: "🪓", en: "A kind woodcutter chased the wolf away.", zh: "一位善良的樵夫把大野狼趕跑了。" },
+        { speaker: "Storyteller", avatar: "👵", en: "Grandma and Red ate cakes together happily.", zh: "外婆和小紅帽開心地一起吃蛋糕。" }
+      ]
+    },
+    {
+      id: "s4", emoji: "🐢", zh: "4. 龜兔賽跑", en: "Tortoise & the Hare",
+      lines: [
+        { speaker: "Storyteller", avatar: "🐇", en: "A fast hare laughed at a slow tortoise.", zh: "一隻跑得快的野兔嘲笑走得慢的烏龜。" },
+        { speaker: "Storyteller", avatar: "🏁", en: "They decided to have a big race.", zh: "牠們決定舉辦一場盛大的賽跑。" },
+        { speaker: "Storyteller", avatar: "💤", en: "The hare took a nap under a shady tree.", zh: "野兔在樹蔭下睡起了午覺。" },
+        { speaker: "Storyteller", avatar: "🐢", en: "The tortoise kept walking step by step.", zh: "烏龜一步接著一步不停地往前走。" },
+        { speaker: "Storyteller", avatar: "🏆", en: "Slow and steady won the race!", zh: "穩紮穩打的烏龜贏得了比賽！" }
+      ]
+    },
+    {
+      id: "s5", emoji: "🦢", zh: "5. 醜小鴨", en: "The Ugly Duckling",
+      lines: [
+        { speaker: "Storyteller", avatar: "🥚", en: "A big egg hatched by the quiet pond.", zh: "安靜的池塘邊孵出了一顆大蛋。" },
+        { speaker: "Storyteller", avatar: "🦆", en: "The gray duckling looked different from others.", zh: "這隻灰灰的小鴨看起來跟大家不一樣。" },
+        { speaker: "Storyteller", avatar: "❄️", en: "He swam alone through the cold winter.", zh: "他獨自游過了寒冷的冬天。" },
+        { speaker: "Storyteller", avatar: "🌷", en: "When spring came, he looked in the water.", zh: "春天來臨時，他往水裡照了照自己。" },
+        { speaker: "Storyteller", avatar: "🦢", en: "He had grown into a beautiful white swan!", zh: "他已經長成一隻美麗的白天鵝了！" }
+      ]
+    },
+    {
+      id: "s6", emoji: "👠", zh: "6. 灰姑娘", en: "Cinderella",
+      lines: [
+        { speaker: "Storyteller", avatar: "🧹", en: "Cinderella worked hard every single day.", zh: "灰姑娘每天都非常努力地工作。" },
+        { speaker: "Storyteller", avatar: "🪄", en: "Her fairy godmother waved a magic wand.", zh: "她的仙女教母揮動了魔法棒。" },
+        { speaker: "Storyteller", avatar: "🎃", en: "A round pumpkin turned into a golden coach.", zh: "一顆圓南瓜變成了一輛金色馬車。" },
+        { speaker: "Storyteller", avatar: "💃", en: "She danced happily at the royal ball.", zh: "她在皇室舞會上開心地跳著舞。" },
+        { speaker: "Storyteller", avatar: "👠", en: "The shiny glass slipper fit her perfectly!", zh: "閃亮的玻璃鞋穿在她腳上剛剛好！" }
+      ]
+    },
+    {
+      id: "s7", emoji: "🌱", zh: "7. 傑克與魔豆", en: "Jack & Beanstalk",
+      lines: [
+        { speaker: "Storyteller", avatar: "🫘", en: "Jack planted five magic beans in the yard.", zh: "傑克在院子裡種下了五顆魔法豆子。" },
+        { speaker: "Storyteller", avatar: "🌿", en: "A giant green beanstalk grew into the clouds.", zh: "一棵巨大的綠豆莖長進了雲端裡。" },
+        { speaker: "Storyteller", avatar: "🏰", en: "Jack climbed up to a castle in the sky.", zh: "傑克往上爬到了天空中的城堡。" },
+        { speaker: "Storyteller", avatar: "🐔", en: "He found a hen that laid golden eggs.", zh: "他發現了一隻會下金蛋的母雞。" },
+        { speaker: "Storyteller", avatar: "😊", en: "Jack and his mom lived happily ever after.", zh: "傑克和媽媽從此過著幸福快樂的生活。" }
+      ]
+    },
+    {
+      id: "s8", emoji: "🍪", zh: "8. 薑餅人", en: "Gingerbread Man",
+      lines: [
+        { speaker: "Storyteller", avatar: "👵", en: "An old woman baked a sweet gingerbread man.", zh: "一位老奶奶烤了一個甜甜的薑餅人。" },
+        { speaker: "Storyteller", avatar: "🏃", en: "He jumped out of the oven and ran!", zh: "他從烤箱裡跳出來拔腿就跑！" },
+        { speaker: "Storyteller", avatar: "🍪", en: "Run, run, as fast as you can!", zh: "跑呀，跑呀，盡你所能地快跑！" },
+        { speaker: "Storyteller", avatar: "🦊", en: "You can't catch me, I'm the Gingerbread Man!", zh: "你們抓不到我，我是薑餅人！" },
+        { speaker: "Storyteller", avatar: "🌊", en: "A clever fox met him by the wide river.", zh: "一隻聰明的狐狸在寬闊的河邊遇見了他。" }
+      ]
+    },
+    {
+      id: "s9", emoji: "🐭", zh: "9. 獅子和老鼠", en: "Lion & the Mouse",
+      lines: [
+        { speaker: "Storyteller", avatar: "🦁", en: "A big sleeping lion caught a tiny mouse.", zh: "一隻睡覺的大獅子抓到了一隻小老鼠。" },
+        { speaker: "Storyteller", avatar: "🐭", en: "Please let me go, I will help you!", zh: "請放我走吧，以後我一定會幫你！" },
+        { speaker: "Storyteller", avatar: "😊", en: "The kind lion smiled and set him free.", zh: "善良的獅子笑了笑就把他放走了。" },
+        { speaker: "Storyteller", avatar: "🕸️", en: "Later, the lion got stuck in a hunter's net.", zh: "後來，獅子被困在獵人的網子裡。" },
+        { speaker: "Storyteller", avatar: "🤝", en: "The little mouse chewed the ropes to save him!", zh: "小老鼠咬斷了繩子救出了獅子！" }
+      ]
+    },
+    {
+      id: "s10", emoji: "🍎", zh: "10. 白雪公主", en: "Snow White",
+      lines: [
+        { speaker: "Storyteller", avatar: "👸", en: "Snow White had skin as white as snow.", zh: "白雪公主有著像雪一樣白皙的皮膚。" },
+        { speaker: "Storyteller", avatar: "🌲", en: "She found a tiny cottage in the woods.", zh: "她在森林裡發現了一間小小的木屋。" },
+        { speaker: "Storyteller", avatar: "⛏️", en: "Seven friendly dwarfs welcomed her inside.", zh: "七個友善的小矮人歡迎她住進來。" },
+        { speaker: "Storyteller", avatar: "🎶", en: "They sang and danced together every evening.", zh: "他們每天晚上都一起唱歌跳舞。" },
+        { speaker: "Storyteller", avatar: "👑", en: "A kind prince woke her with true love.", zh: "一位善良的王子用真愛喚醒了她。" }
+      ]
+    },
+    {
+      id: "s11", emoji: "🤥", zh: "11. 木偶奇遇記", en: "Pinocchio",
+      lines: [
+        { speaker: "Storyteller", avatar: "🪚", en: "Geppetto carved a wooden puppet named Pinocchio.", zh: "傑佩托雕刻了一個名叫皮諾丘的木偶。" },
+        { speaker: "Storyteller", avatar: "⭐", en: "The Blue Fairy brought the little puppet to life.", zh: "藍仙女賦予了小木偶生命。" },
+        { speaker: "Storyteller", avatar: "🤥", en: "His nose grew longer when he told a lie.", zh: "當他說謊時，他的鼻子就會變長。" },
+        { speaker: "Storyteller", avatar: "🐋", en: "Pinocchio bravely saved Geppetto from a whale.", zh: "皮諾丘勇敢地從鯨魚肚子裡救出傑佩托。" },
+        { speaker: "Storyteller", avatar: "👦", en: "Because he was honest, he became a real boy!", zh: "因為他變得誠實，他成為了真正的男孩！" }
+      ]
+    },
+    {
+      id: "s12", emoji: "🍭", zh: "12. 糖果屋", en: "Hansel & Gretel",
+      lines: [
+        { speaker: "Storyteller", avatar: "🌲", en: "Hansel and Gretel walked deep into the forest.", zh: "漢賽爾和葛麗特走進了森林深處。" },
+        { speaker: "Storyteller", avatar: "🏠", en: "They found a house made of sweet candy!", zh: "他們發現了一棟用香甜糖果蓋成的房子！" },
+        { speaker: "Storyteller", avatar: "🍫", en: "The roof was chocolate and the windows were sugar.", zh: "屋頂是巧克力做的，窗戶是糖做的。" },
+        { speaker: "Storyteller", avatar: "🧠", en: "The clever children outsmarted the mean witch.", zh: "聰明的兄妹倆用智慧打敗了壞女巫。" },
+        { speaker: "Storyteller", avatar: "🏡", en: "They found their way safely back to Father.", zh: "他們平安地找到了回爸爸身邊的路。" }
+      ]
+    },
+    {
+      id: "s13", emoji: "🐸", zh: "13. 青蛙王子", en: "The Frog Prince",
+      lines: [
+        { speaker: "Storyteller", avatar: "👑", en: "A young princess dropped her golden ball in a pond.", zh: "一位小公主把她的金球掉進了池塘裡。" },
+        { speaker: "Storyteller", avatar: "🐸", en: "A little green frog swam down to get it.", zh: "一隻綠色的小青蛙游進水裡幫她撿起來。" },
+        { speaker: "Storyteller", avatar: "🍽️", en: "The frog ate dinner at the royal table.", zh: "小青蛙在皇室餐桌上一起吃晚餐。" },
+        { speaker: "Storyteller", avatar: "✨", en: "The princess kept her promise to be his friend.", zh: "公主信守承諾當他的好朋友。" },
+        { speaker: "Storyteller", avatar: "🤴", en: "Poof! The frog turned back into a kind prince!", zh: "砰！小青蛙變回了一位善良的王子！" }
+      ]
+    },
+    {
+      id: "s14", emoji: "🌹", zh: "14. 睡美人", en: "Sleeping Beauty",
+      lines: [
+        { speaker: "Storyteller", avatar: "🧚", en: "Good fairies gave gifts to baby Princess Aurora.", zh: "善良的仙子們送給小奧蘿拉公主祝福禮物。" },
+        { speaker: "Storyteller", avatar: "😴", en: "She fell into a deep, peaceful sleep.", zh: "她陷入了一場深沉又安詳的睡眠。" },
+        { speaker: "Storyteller", avatar: "🌹", en: "Tall green roses grew all around the castle.", zh: "高大的綠色玫瑰藤蔓長滿了城堡四周。" },
+        { speaker: "Storyteller", avatar: "🐎", en: "A brave prince rode through the forest to find her.", zh: "一位勇敢的王子騎馬穿越森林找到了她。" },
+        { speaker: "Storyteller", avatar: "☀️", en: "The princess woke up and everyone celebrated!", zh: "公主醒了過來，大家都開心地慶祝！" }
+      ]
+    },
+    {
+      id: "s15", emoji: "🧜‍♀️", zh: "15. 小美人魚", en: "The Little Mermaid",
+      lines: [
+        { speaker: "Storyteller", avatar: "🌊", en: "Ariel lived in a bright palace under the sea.", zh: "愛麗兒住在海底一座明亮的宮殿裡。" },
+        { speaker: "Storyteller", avatar: "🐠", en: "She loved swimming with colorful fish and crabs.", zh: "她喜歡和五顏六色的小魚及螃蟹一起游泳。" },
+        { speaker: "Storyteller", avatar: "🎶", en: "She had the sweetest singing voice in the ocean.", zh: "她擁有全海洋最甜美的歌聲。" },
+        { speaker: "Storyteller", avatar: "⛵", en: "She dreamed of walking on the sandy beach.", zh: "她夢想著能在沙灘上散步。" },
+        { speaker: "Storyteller", avatar: "💖", en: "Her kind heart brought joy to both worlds.", zh: "她善良的心為海洋與陸地都帶來了快樂。" }
+      ]
+    },
+    {
+      id: "s16", emoji: "🐐", zh: "16. 三隻山羊嘎啦嘎啦", en: "Three Billy Goats",
+      lines: [
+        { speaker: "Storyteller", avatar: "🐐", en: "Three billy goats wanted to eat green grass.", zh: "三隻山羊想去吃對岸綠油油的青草。" },
+        { speaker: "Storyteller", avatar: "🌉", en: "Trip, trap! They crossed a wooden bridge.", zh: "踢踏、踢踏！牠們走過一座木橋。" },
+        { speaker: "Storyteller", avatar: "👹", en: "A grumpy troll lived under the bridge.", zh: "橋底下住著一隻脾氣暴躁的巨魔。" },
+        { speaker: "Storyteller", avatar: "💪", en: "The biggest billy goat bumped the troll away.", zh: "最大隻的山羊把巨魔頂走了。" },
+        { speaker: "Storyteller", avatar: "🌿", en: "All three goats ate sweet grass happily!", zh: "三隻山羊都開心地吃到了香甜的青草！" }
+      ]
+    },
+    {
+      id: "s17", emoji: "🐔", zh: "17. 小紅母雞", en: "The Little Red Hen",
+      lines: [
+        { speaker: "Storyteller", avatar: "🐔", en: "The Little Red Hen found some golden wheat seeds.", zh: "小紅母雞找到了一些金黃色的小麥種子。" },
+        { speaker: "Storyteller", avatar: "🌾", en: "Nobody helped her plant or water the wheat.", zh: "沒有人願意幫她種小麥或澆水。" },
+        { speaker: "Storyteller", avatar: "🍞", en: "She baked a warm, yummy loaf of bread.", zh: "她烤了一條溫熱又香噴噴的麵包。" },
+        { speaker: "Storyteller", avatar: "🐱", en: "Then the lazy cat and dog wanted a bite!", zh: "這時懶惰的小貓和小狗都想吃一口！" },
+        { speaker: "Storyteller", avatar: "⭐", en: "Hard work always brings the sweetest reward.", zh: "努力工作總是會帶來最甜美的收穫。" }
+      ]
+    },
+    {
+      id: "s18", emoji: "🥕", zh: "18. 拔蘿蔔", en: "The Enormous Turnip",
+      lines: [
+        { speaker: "Storyteller", avatar: "👴", en: "Grandpa planted a tiny turnip seed.", zh: "老爺爺種下了一顆小小的蘿蔔種子。" },
+        { speaker: "Storyteller", avatar: "🌱", en: "It grew into an enormous giant turnip!", zh: "它長成了一顆超級巨大的大蘿蔔！" },
+        { speaker: "Storyteller", avatar: "👵", en: "Grandpa and Grandma pulled with all their might.", zh: "老爺爺和老奶奶使出吃奶的力氣拔。" },
+        { speaker: "Storyteller", avatar: "🐕", en: "The girl, dog, cat, and mouse joined the line!", zh: "小女孩、小狗、小貓和小老鼠都加入行列！" },
+        { speaker: "Storyteller", avatar: "🎉", en: "Pop! Out came the giant turnip at last!", zh: "啵一聲！大蘿蔔終於被拔出來了！" }
+      ]
+    },
+    {
+      id: "s19", emoji: "🌷", zh: "19. 拇指姑娘", en: "Thumbelina",
+      lines: [
+        { speaker: "Storyteller", avatar: "🌷", en: "A tiny girl popped out of a red tulip.", zh: "一個小小女孩從一朵紅色鬱金香裡冒出來。" },
+        { speaker: "Storyteller", avatar: "🥜", en: "She slept in a shiny walnut shell bed.", zh: "她睡在閃亮的核桃殼小床裡。" },
+        { speaker: "Storyteller", avatar: "🐦", en: "She helped a cold swallow get warm again.", zh: "她幫助一隻受寒的燕子重新溫暖起來。" },
+        { speaker: "Storyteller", avatar: "🕊️", en: "The grateful swallow flew her to a sunny land.", zh: "心存感激的燕子載著她飛向陽光國度。" },
+        { speaker: "Storyteller", avatar: "🧚‍♀️", en: "She met the flower prince and got fairy wings!", zh: "她遇見了花王子並獲得一對仙子翅膀！" }
+      ]
+    },
+    {
+      id: "s20", emoji: "👑", zh: "20. 國王的新衣", en: "Emperor's New Clothes",
+      lines: [
+        { speaker: "Storyteller", avatar: "🤴", en: "A silly king loved wearing fancy new clothes.", zh: "一位愛漂亮的國王喜歡穿華麗的新衣服。" },
+        { speaker: "Storyteller", avatar: "🧵", en: "Two tricky tailors pretended to sew magic silk.", zh: "兩個狡猾的裁縫師假裝在縫製魔法絲綢。" },
+        { speaker: "Storyteller", avatar: "👀", en: "Nobody could see any clothes at all!", zh: "根本沒有任何人看得到任何衣服！" },
+        { speaker: "Storyteller", avatar: "🧒", en: "A little boy shouted, The king has no clothes!", zh: "一個小男孩大喊：國王什麼衣服都沒穿！" },
+        { speaker: "Storyteller", avatar: "😂", en: "Everyone laughed and learned to speak the truth.", zh: "大家都笑了，並學會要勇敢說真話。" }
+      ]
+    },
+    {
+      id: "s21", emoji: "🪔", zh: "21. 阿拉丁與神燈", en: "Aladdin & Magic Lamp",
+      lines: [
+        { speaker: "Storyteller", avatar: "🪔", en: "Aladdin found an old golden lamp in a cave.", zh: "阿拉丁在山洞裡找到一盞古老的金燈。" },
+        { speaker: "Storyteller", avatar: "💨", en: "He rubbed the lamp and a friendly genie appeared!", zh: "他擦了擦神燈，一位友善的精靈出現了！" },
+        { speaker: "Storyteller", avatar: "🧞", en: "The genie granted Aladdin three big wishes.", zh: "精靈實現了阿拉丁三個大願望。" },
+        { speaker: "Storyteller", avatar: "🕌", en: "Aladdin flew on a magic carpet across the stars.", zh: "阿拉丁乘著魔毯飛越星空。" },
+        { speaker: "Storyteller", avatar: "🆓", en: "With his last wish, he set the genie free!", zh: "他用最後一個願望讓精靈獲得了自由！" }
+      ]
+    },
+    {
+      id: "s22", emoji: "🥀", zh: "22. 美女與野獸", en: "Beauty & the Beast",
+      lines: [
+        { speaker: "Storyteller", avatar: "📖", en: "Kind Belle loved reading books every day.", zh: "善良的貝兒每天都喜歡看書。" },
+        { speaker: "Storyteller", avatar: "🏰", en: "She visited an enchanted castle in the woods.", zh: "她造訪了森林裡一座施了魔法的城堡。" },
+        { speaker: "Storyteller", avatar: "🦁", en: "The Beast looked scary, but had a gentle heart.", zh: "野獸看起來很嚇人，但卻有一顆溫柔的心。" },
+        { speaker: "Storyteller", avatar: "💃", en: "Belle and the Beast danced in the golden hall.", zh: "貝兒和野獸在金色大廳裡翩翩起舞。" },
+        { speaker: "Storyteller", avatar: "✨", en: "Kindness broke the spell and turned him back!", zh: "善良解開了魔咒，讓他變回了王子！" }
+      ]
+    },
+    {
+      id: "s23", emoji: "🧚‍♂️", zh: "23. 彼得潘夢幻島", en: "Peter Pan",
+      lines: [
+        { speaker: "Storyteller", avatar: "🧚‍♂️", en: "Peter Pan was the boy who never grew up.", zh: "彼得潘是一個永遠長不大的男孩。" },
+        { speaker: "Storyteller", avatar: "✨", en: "Tinker Bell sprinkled shiny pixie dust.", zh: "奇妙仙子灑下閃閃發亮的仙塵。" },
+        { speaker: "Storyteller", avatar: "🌙", en: "Wendy and her brothers flew to Neverland!", zh: "溫蒂和弟弟們飛向了夢幻島！" },
+        { speaker: "Storyteller", avatar: "🏴‍☠️", en: "They played with the Lost Boys and beat Captain Hook.", zh: "他們和失落男孩一起玩並打敗了虎克船長。" },
+        { speaker: "Storyteller", avatar: "🏠", en: "Then they flew happily back to their cozy home.", zh: "然後他們開心地飛回溫馨的家。" }
+      ]
+    },
+    {
+      id: "s24", emoji: "🌈", zh: "24. 綠野仙蹤", en: "The Wizard of Oz",
+      lines: [
+        { speaker: "Storyteller", avatar: "🐕", en: "Dorothy and her dog Toto followed a yellow road.", zh: "桃樂絲和她的狗狗托托沿著黃磚路前進。" },
+        { speaker: "Storyteller", avatar: "🌾", en: "They met a Scarecrow who wanted a smart brain.", zh: "他們遇見了想要聰明頭腦的稻草人。" },
+        { speaker: "Storyteller", avatar: "🤖", en: "They helped a Tin Man and a shy Lion too.", zh: "他們也幫助了錫樵夫和害羞的獅子。" },
+        { speaker: "Storyteller", avatar: "💚", en: "Together they reached the bright Emerald City.", zh: "他們一起抵達了閃耀的翡翠城。" },
+        { speaker: "Storyteller", avatar: "👠", en: "Dorothy clicked her red shoes and went home!", zh: "桃樂絲輕敲紅鞋三下就回到家了！" }
+      ]
+    },
+    {
+      id: "s25", emoji: "🐰", zh: "25. 愛麗絲夢遊仙境", en: "Alice in Wonderland",
+      lines: [
+        { speaker: "Storyteller", avatar: "🐇", en: "Alice followed a White Rabbit with a pocket watch.", zh: "愛麗絲跟著一隻拿著懷錶的白兔先生。" },
+        { speaker: "Storyteller", avatar: "🕳️", en: "Down, down she fell into a magical Wonderland!", zh: "掉呀掉呀，她掉進了神奇的仙境裡！" },
+        { speaker: "Storyteller", avatar: "☕", en: "She joined a silly tea party with the Mad Hatter.", zh: "她參加了瘋帽客舉辦的有趣茶會。" },
+        { speaker: "Storyteller", avatar: "😸", en: "A smiling Cheshire Cat gave her helpful clues.", zh: "一隻微笑的柴郡貓給了她有用的線索。" },
+        { speaker: "Storyteller", avatar: "🌳", en: "Soon Alice woke up under the sunny garden tree.", zh: "很快地愛麗絲在陽光花園的樹下醒來了。" }
+      ]
+    },
+    {
+      id: "s26", emoji: "🏙️", zh: "26. 城裡老鼠和鄉下老鼠", en: "Town & Country Mouse",
+      lines: [
+        { speaker: "Storyteller", avatar: "🌾", en: "Country Mouse lived peacefully in a quiet field.", zh: "鄉下老鼠平靜地住在安靜的田野裡。" },
+        { speaker: "Storyteller", avatar: "🧀", en: "Town Mouse invited him to eat fancy city cheese.", zh: "城裡老鼠邀請他去吃豪華的城市起司。" },
+        { speaker: "Storyteller", avatar: "🐱", en: "Suddenly, a big hungry cat chased them away!", zh: "突然間，一隻又大又餓的貓咪追了過來！" },
+        { speaker: "Storyteller", avatar: "🏃", en: "Country Mouse ran back to his safe little home.", zh: "鄉下老鼠趕緊跑回他安全的小家。" },
+        { speaker: "Storyteller", avatar: "🏡", en: "Simple food in peace is better than fancy fear!", zh: "平靜地吃簡單食物勝過提心吊膽吃大餐！" }
+      ]
+    },
+    {
+      id: "s27", emoji: "🐜", zh: "27. 螞蟻與蚱蜢", en: "Ant & Grasshopper",
+      lines: [
+        { speaker: "Storyteller", avatar: "🐜", en: "Busy little ants carried food all summer long.", zh: "忙碌的小螞蟻整個夏天都在搬運食物。" },
+        { speaker: "Storyteller", avatar: "🦗", en: "The grasshopper sang and danced in the warm sun.", zh: "蚱蜢則在溫暖的陽光下唱歌跳舞。" },
+        { speaker: "Storyteller", avatar: "❄️", en: "Soon white snow covered the cold ground.", zh: "很快地白雪覆蓋了冰冷的大地。" },
+        { speaker: "Storyteller", avatar: "🥶", en: "The hungry grasshopper had nothing left to eat.", zh: "飢餓的蚱蜢沒有任何東西可以吃了。" },
+        { speaker: "Storyteller", avatar: "🍲", en: "The kind ants shared warm soup and taught him to plan.", zh: "善良的螞蟻分享熱湯並教他未雨綢繆。" }
+      ]
+    },
+    {
+      id: "s28", emoji: "☀️", zh: "28. 北風與太陽", en: "North Wind & the Sun",
+      lines: [
+        { speaker: "Storyteller", avatar: "💨", en: "The North Wind and the Sun had a contest.", zh: "北風和太陽舉辦了一場比賽。" },
+        { speaker: "Storyteller", avatar: "🧥", en: "Who could make a traveler take off his coat?", zh: "誰能讓旅人脫下他的外套呢？" },
+        { speaker: "Storyteller", avatar: "🌬️", en: "The Wind blew hard, so the man held his coat tight.", zh: "北風用力吹，旅人反而把外套抓得更緊。" },
+        { speaker: "Storyteller", avatar: "☀️", en: "Then the Sun smiled and shone warm and bright.", zh: "接著太陽微笑著照耀出溫暖明亮的光芒。" },
+        { speaker: "Storyteller", avatar: "😊", en: "The man felt warm and happily took off his coat!", zh: "旅人覺得好溫暖，開心地脫下了外套！" }
+      ]
+    },
+    {
+      id: "s29", emoji: "👞", zh: "29. 精靈與鞋匠", en: "Elves & the Shoemaker",
+      lines: [
+        { speaker: "Storyteller", avatar: "👞", en: "A poor kind shoemaker had only one piece of leather.", zh: "一位貧窮但善良的鞋匠只剩下一塊皮革。" },
+        { speaker: "Storyteller", avatar: "🧚", en: "At night, two tiny elves sewed shiny new shoes!", zh: "到了晚上，兩個小精靈縫製了閃亮的新鞋子！" },
+        { speaker: "Storyteller", avatar: "💰", en: "People loved the shoes and bought them all.", zh: "大家都很喜歡這些鞋子並全部買走了。" },
+        { speaker: "Storyteller", avatar: "👕", en: "The shoemaker's wife made tiny warm coats for the elves.", zh: "鞋匠的太太為小精靈做了溫暖的小外套。" },
+        { speaker: "Storyteller", avatar: "💃", en: "The happy elves danced in their new clothes!", zh: "開心的小精靈穿著新衣服跳起舞來！" }
+      ]
+    },
+    {
+      id: "s30", emoji: "🐰", zh: "30. 彼得兔的菜園冒險", en: "Tale of Peter Rabbit",
+      lines: [
+        { speaker: "Storyteller", avatar: "🐰", en: "Little Peter Rabbit wore a bright blue jacket.", zh: "小彼得兔穿著一件亮藍色的夾克。" },
+        { speaker: "Storyteller", avatar: "🥕", en: "He hopped into Mr. McGregor's vegetable garden.", zh: "他蹦蹦跳跳溜進了麥奎格先生的菜園。" },
+        { speaker: "Storyteller", avatar: "🥬", en: "He crunched on sweet carrots and green lettuce.", zh: "他喀滋喀滋地吃著香甜的胡蘿蔔和綠生菜。" },
+        { speaker: "Storyteller", avatar: "🏃", en: "Peter ran fast and squeezed under the garden gate!", zh: "彼得兔飛快地跑並從菜園大門底下鑽了出去！" },
+        { speaker: "Storyteller", avatar: "🍵", en: "At home, Mother Rabbit gave him warm chamomile tea.", zh: "回到家後，兔媽媽泡了溫熱的洋甘菊茶給他喝。" }
+      ]
+    }
+  ];
+
+  // ==========================================
+  // 2. STORAGE & STATE MANAGEMENT
   // ==========================================
   const STORAGE_KEY = 'kids_english_buddy_archive_v1';
   const API_KEY_STORAGE = 'kids_english_buddy_gemini_key';
@@ -821,36 +1566,31 @@
   const RETENTION_DAYS = 180; // 半年保存期限
   const WORD_GAP_MS = 1000;   // 慢速語速單字與單字之間間隔 1 秒
 
-  const DEFAULT_LESSON = {
-    date: getTodayStr(),
-    stars: 0,
-    dialogue: {
-      title: "日常對話：早餐時間 Breakfast Time",
-      lines: [
-        { speaker: "Mom", avatar: "👩", en: "Good morning! Are you hungry?", zh: "早安！你肚子餓了嗎？" },
-        { speaker: "Kid", avatar: "🧒", en: "Yes, I am very hungry!", zh: "是的，我好餓喔！" },
-        { speaker: "Mom", avatar: "👩", en: "Do you want milk or juice?", zh: "你想要牛奶還是果汁？" },
-        { speaker: "Kid", avatar: "🧒", en: "I want warm milk, please.", zh: "請給我溫牛奶。" },
-        { speaker: "Mom", avatar: "👩", en: "Here you are. Yummy!", zh: "給你。好好吃喔！" }
-      ]
-    },
-    story: {
-      title: "經典童話：三隻小豬 The Three Little Pigs",
-      lines: [
-        { speaker: "Storyteller", avatar: "🐷", en: "Three little pigs built three houses.", zh: "三隻小豬蓋了三棟房子。" },
-        { speaker: "Storyteller", avatar: "🌾", en: "The first pig used yellow straw.", zh: "第一隻小豬用了黃色的稻草。" },
-        { speaker: "Storyteller", avatar: "🪵", en: "The second pig used brown sticks.", zh: "第二隻小豬用了棕色的木棍。" },
-        { speaker: "Storyteller", avatar: "🧱", en: "The third pig used strong red bricks.", zh: "第三隻小豬用了堅固的紅磚頭。" },
-        { speaker: "Storyteller", avatar: "🐺", en: "The big bad wolf could not blow it down!", zh: "大野狼怎麼吹也吹不倒它！" }
-      ]
-    }
-  };
+  function buildInitialLessonForDate(dateStr) {
+    const d0 = DIALOGUE_TOPICS[0];
+    const s0 = STORY_TOPICS[0];
+    return {
+      date: dateStr,
+      stars: 0,
+      selectedDialogueId: d0.id,
+      selectedStoryId: s0.id,
+      dialogue: {
+        title: `日常對話：${d0.zh.replace(/^\d+\.\s*/, '')} ${d0.en}`,
+        lines: JSON.parse(JSON.stringify(d0.lines))
+      },
+      story: {
+        title: `經典童話：${s0.zh.replace(/^\d+\.\s*/, '')} ${s0.en}`,
+        lines: JSON.parse(JSON.stringify(s0.lines))
+      }
+    };
+  }
 
   let archiveData = {};
   let activeDate = getTodayStr();
   let currentMode = 'dialogue'; // 'dialogue' | 'story'
   let currentIndex = 0;
   let showZh = true;
+  let isPickerOpen = true;
   let isLoopRunning = false;
   let loopToken = 0;
   let activeRecognition = null;
@@ -877,8 +1617,7 @@
     }
     purgeOldRecords();
     if (!archiveData[activeDate]) {
-      archiveData[activeDate] = JSON.parse(JSON.stringify(DEFAULT_LESSON));
-      archiveData[activeDate].date = activeDate;
+      archiveData[activeDate] = buildInitialLessonForDate(activeDate);
       saveArchive();
     }
   }
@@ -905,7 +1644,7 @@
   }
 
   function getCurrentLessonObj() {
-    return archiveData[activeDate] || DEFAULT_LESSON;
+    return archiveData[activeDate] || buildInitialLessonForDate(activeDate);
   }
 
   function getCurrentLines() {
@@ -913,8 +1652,97 @@
     return lesson[currentMode].lines;
   }
 
+  function getActiveTopicMeta() {
+    const lesson = getCurrentLessonObj();
+    if (currentMode === 'dialogue') {
+      const id = lesson.selectedDialogueId || 'd1';
+      return DIALOGUE_TOPICS.find(t => t.id === id) || DIALOGUE_TOPICS[0];
+    } else {
+      const id = lesson.selectedStoryId || 's1';
+      return STORY_TOPICS.find(t => t.id === id) || STORY_TOPICS[0];
+    }
+  }
+
   // ==========================================
-  // 2. DUAL VOICE ENGINE (BROWSER + CLOUD TTS)
+  // 3. 30-TOPIC PICKER RENDER & SELECTION
+  // ==========================================
+  function renderTopicPicker() {
+    const titleEl = document.getElementById('topicPickerTitle');
+    const gridEl = document.getElementById('topicGrid');
+    const keyword = (document.getElementById('topicSearchInput')?.value || '').trim().toLowerCase();
+    const activeTopic = getActiveTopicMeta();
+
+    const sourceList = currentMode === 'dialogue' ? DIALOGUE_TOPICS : STORY_TOPICS;
+    const filteredList = keyword
+      ? sourceList.filter(t => t.zh.toLowerCase().includes(keyword) || t.en.toLowerCase().includes(keyword))
+      : sourceList;
+
+    if (currentMode === 'dialogue') {
+      titleEl.textContent = `💬 請挑選 1 種生活情境（共 ${DIALOGUE_TOPICS.length} 種，點選即可開始練習）`;
+    } else {
+      titleEl.textContent = `📖 請挑選 1 篇經典童話故事（共 ${STORY_TOPICS.length} 篇，點選即可開始練習）`;
+    }
+
+    if (filteredList.length === 0) {
+      gridEl.innerHTML = `<div style="grid-column: 1 / -1; text-align:center; padding:16px; color:var(--muted);">找不到符合「${escapeHtml(keyword)}」的主題，請試試其他關鍵字。</div>`;
+      return;
+    }
+
+    gridEl.innerHTML = filteredList.map(t => `
+      <div class="topic-chip ${t.id === activeTopic.id ? 'selected' : ''}" onclick="selectTopic('${t.id}')">
+        <span class="t-emoji">${t.emoji}</span>
+        <span class="t-zh">${escapeHtml(t.zh)}</span>
+        <span class="t-en">${escapeHtml(t.en)}</span>
+      </div>
+    `).join('');
+  }
+
+  function clearTopicSearch() {
+    const input = document.getElementById('topicSearchInput');
+    if (input) input.value = '';
+    renderTopicPicker();
+  }
+
+  function toggleTopicPicker() {
+    isPickerOpen = !isPickerOpen;
+    document.getElementById('topicPickerCard').style.display = isPickerOpen ? 'block' : 'none';
+    document.getElementById('btnTogglePicker').textContent = isPickerOpen ? '📋 收合主題選單' : '📋 挑選主題 (30選1)';
+  }
+
+  function selectTopic(topicId) {
+    stopAllAudioAndMic();
+    const lesson = getCurrentLessonObj();
+
+    if (currentMode === 'dialogue') {
+      const chosen = DIALOGUE_TOPICS.find(t => t.id === topicId);
+      if (!chosen) return;
+      lesson.selectedDialogueId = chosen.id;
+      lesson.dialogue = {
+        title: `日常對話：${chosen.zh.replace(/^\d+\.\s*/, '')} ${chosen.en}`,
+        lines: JSON.parse(JSON.stringify(chosen.lines))
+      };
+    } else {
+      const chosen = STORY_TOPICS.find(t => t.id === topicId);
+      if (!chosen) return;
+      lesson.selectedStoryId = chosen.id;
+      lesson.story = {
+        title: `經典童話：${chosen.zh.replace(/^\d+\.\s*/, '')} ${chosen.en}`,
+        lines: JSON.parse(JSON.stringify(chosen.lines))
+      };
+    }
+
+    saveArchive();
+    currentIndex = 0;
+    setStepHighlight(0);
+    renderTopicPicker();
+    renderSentence();
+
+    const activeTopic = getActiveTopicMeta();
+    setStatus(`已選擇「${activeTopic.zh.replace(/^\d+\.\s*/, '')} (${activeTopic.en})」`, '按「▶️ 開始朗讀」開始練習，或按「✨ AI 生成此主題新內容」變換新句子！');
+  }
+
+  // ==========================================
+  // 4. DUAL VOICE ENGINE (BROWSER + CLOUD TTS)
   // ==========================================
   function getVoiceEngineMode() {
     return localStorage.getItem(VOICE_ENGINE_STORAGE) || 'browser';
@@ -997,7 +1825,6 @@
     return raw === null ? true : raw === 'true';
   }
 
-  // Synthesize via Google Cloud Text-to-Speech REST API
   async function speakWithGoogleCloudTTS(text, rate, token, overrideVoice = null, overrideKey = null) {
     const apiKey = overrideKey !== null ? overrideKey : getCloudApiKey();
     const voiceName = overrideVoice || getCloudVoiceName();
@@ -1115,7 +1942,6 @@
     });
   }
 
-  // Unified single-utterance speech entry point
   async function speakEnglish(text, rate, token, overrideEngine = null, overrideVoice = null, overrideKey = null) {
     if (token !== loopToken) return false;
     const engine = overrideEngine || getVoiceEngineMode();
@@ -1134,7 +1960,6 @@
     return await speakWithBrowserTTS(text, rate, token, overrideVoice);
   }
 
-  // Step 3: Word-by-word slow articulation with exact 1-second (1000ms) pause between words
   async function speakSlowWordByWordWith1SecGap(sentence, rate, token, highlightWordsOnCard = true, overrideEngine = null, overrideVoice = null, overrideKey = null) {
     const words = sentence.trim().split(/\s+/).filter(Boolean);
     for (let i = 0; i < words.length; i++) {
@@ -1149,7 +1974,7 @@
 
       if (i < words.length - 1) {
         if (highlightWordsOnCard) {
-          renderSentence(null, -1); // Clear highlight during the 1-second gap
+          renderSentence(null, -1);
         }
         const waited = await waitMs(WORD_GAP_MS, token);
         if (!waited || token !== loopToken) return false;
@@ -1163,7 +1988,7 @@
   }
 
   // ==========================================
-  // 3. UI RENDERING & NAVIGATION
+  // 5. UI RENDERING & NAVIGATION
   // ==========================================
   function renderSentence(wordStatuses = null, speakingWordIndex = -1) {
     const lesson = getCurrentLessonObj();
@@ -1215,9 +2040,12 @@
     currentIndex = 0;
     document.getElementById('btnModeDialog').classList.toggle('active', mode === 'dialogue');
     document.getElementById('btnModeStory').classList.toggle('active', mode === 'story');
+    clearTopicSearch();
     setStepHighlight(0);
-    setStatus('點擊下方「開始朗讀」啟動跟讀循環', '');
+    renderTopicPicker();
     renderSentence();
+    const activeTopic = getActiveTopicMeta();
+    setStatus(`目前主題：${activeTopic.zh.replace(/^\d+\.\s*/, '')} (${activeTopic.en})`, '可在上方挑選其他主題，或直接按「▶️ 開始朗讀」');
   }
 
   function switchView(view) {
@@ -1252,13 +2080,13 @@
       startSentenceLoop();
     } else {
       setStepHighlight(7);
-      setStatus('🎉 太棒了！你已經完成本篇所有句子的跟讀練習！', '可以切換模式或生成新課程喔！', 'success');
+      setStatus('🎉 太棒了！你已經完成本篇所有句子的跟讀練習！', '可以在上方挑選下一個生活情境或故事繼續挑戰喔！', 'success');
       playChime(true);
     }
   }
 
   // ==========================================
-  // 4. 7-STEP GUIDED SHADOWING LOOP
+  // 6. 7-STEP GUIDED SHADOWING LOOP
   // ==========================================
   function waitMs(ms, token) {
     return new Promise((resolve) => {
@@ -1462,7 +2290,7 @@
   function stopAllAudioAndMic() {
     loopToken++;
     isLoopRunning = false;
-    renderSentence(); // Reset any word highlight
+    renderSentence();
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
     }
@@ -1477,7 +2305,7 @@
   }
 
   // ==========================================
-  // 5. STANDALONE MICROPHONE DIAGNOSTIC TOOL
+  // 7. STANDALONE MICROPHONE DIAGNOSTIC TOOL
   // ==========================================
   function mapSpeechErrorToChinese(errCode) {
     const map = {
@@ -1591,42 +2419,44 @@
   }
 
   // ==========================================
-  // 6. GEMINI API DAILY CONTENT GENERATOR
+  // 8. GEMINI API TOPIC-AWARE CONTENT GENERATOR
   // ==========================================
   async function generateNewDailyLesson() {
     const apiKey = localStorage.getItem(API_KEY_STORAGE);
     if (!apiKey) {
-      alert('請先點擊右上角「⚙️ 設定與語音」輸入您的 Gemini API Key，即可每日自動生成全新對話與童話！');
+      alert('請先點擊右上角「⚙️ 設定與語音」輸入您的 Gemini API Key，即可依所選主題生成全新對話與童話！');
       openSettings();
       return;
     }
 
     stopAllAudioAndMic();
+    const activeTopic = getActiveTopicMeta();
+    const topicCleanZh = activeTopic.zh.replace(/^\d+\.\s*/, '');
+
     const btn = document.getElementById('btnGenerate');
     btn.disabled = true;
-    btn.textContent = '⏳ AI 正在編寫今日課程...';
-    setStatus('✨ Gemini 正在為孩子創作今日日常對話與經典童話...', '請稍候約 5～10 秒');
+    btn.textContent = '⏳ AI 正在編寫中...';
+    setStatus(`✨ Gemini 正在為主題「${topicCleanZh} (${activeTopic.en})」編寫全新句子...`, '請稍候約 5～10 秒');
 
-    const prompt = `Create English learning content for a US Kindergarten level child (ages 5-7), with Traditional Chinese (繁體中文) translations.
+    const prompt = currentMode === 'dialogue'
+      ? `Create a brand-new, cheerful 5-line everyday English conversation for a US Kindergarten child (ages 5-7) specifically about the situation: "${activeTopic.en}" (${topicCleanZh}).
 Return ONLY valid JSON with this exact schema:
 {
-  "dialogue": {
-    "title": "日常對話：[Topic in Chinese & English]",
-    "lines": [
-      { "speaker": "Character Name", "avatar": "single emoji", "en": "Short simple English sentence (4-8 words).", "zh": "繁體中文翻譯" }
-    ]
-  },
-  "story": {
-    "title": "經典童話：[Classic Fairy Tale Title in Chinese & English]",
-    "lines": [
-      { "speaker": "Storyteller", "avatar": "single emoji", "en": "Short simple English story sentence (5-9 words).", "zh": "繁體中文翻譯" }
-    ]
-  }
+  "title": "日常對話：${topicCleanZh} ${activeTopic.en} (AI新編)",
+  "lines": [
+    { "speaker": "Character Name", "avatar": "single emoji", "en": "Short simple English sentence (4-8 words).", "zh": "繁體中文翻譯" }
+  ]
 }
-Requirements:
-- Exactly 5 lines for "dialogue" (everyday kid situation like playground, pets, snacks, school, weather).
-- Exactly 5 lines for "story" (adapted classic fairy tale like Goldilocks, Little Red Riding Hood, Tortoise and Hare, Ugly Duckling, Cinderella).
-- Use simple, cheerful kindergarten vocabulary.`;
+Requirements: Exactly 5 lines, simple kindergarten vocabulary, natural conversational flow.`
+      : `Adapt the classic fairy tale "${activeTopic.en}" (${topicCleanZh}) into a fresh, gentle 5-sentence read-aloud story for a US Kindergarten child (ages 5-7).
+Return ONLY valid JSON with this exact schema:
+{
+  "title": "經典童話：${topicCleanZh} ${activeTopic.en} (AI新編)",
+  "lines": [
+    { "speaker": "Storyteller", "avatar": "single emoji", "en": "Short simple English story sentence (5-9 words).", "zh": "繁體中文翻譯" }
+  ]
+}
+Requirements: Exactly 5 lines, simple kindergarten vocabulary, heartwarming tone.`;
 
     try {
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`, {
@@ -1636,7 +2466,7 @@ Requirements:
           contents: [{ parts: [{ text: prompt }] }],
           generationConfig: {
             responseMimeType: "application/json",
-            temperature: 0.8
+            temperature: 0.85
           }
         })
       });
@@ -1650,34 +2480,45 @@ Requirements:
       const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
       const parsed = JSON.parse(rawText);
 
-      if (!parsed.dialogue?.lines?.length || !parsed.story?.lines?.length) {
+      if (!parsed.lines?.length) {
         throw new Error('回傳格式不完整');
       }
 
       const today = getTodayStr();
       activeDate = today;
-      archiveData[today] = {
-        date: today,
-        stars: archiveData[today]?.stars || 0,
-        dialogue: parsed.dialogue,
-        story: parsed.story
-      };
+      if (!archiveData[today]) {
+        archiveData[today] = buildInitialLessonForDate(today);
+      }
+
+      if (currentMode === 'dialogue') {
+        archiveData[today].selectedDialogueId = activeTopic.id;
+        archiveData[today].dialogue = {
+          title: parsed.title || `日常對話：${topicCleanZh} ${activeTopic.en}`,
+          lines: parsed.lines
+        };
+      } else {
+        archiveData[today].selectedStoryId = activeTopic.id;
+        archiveData[today].story = {
+          title: parsed.title || `經典童話：${topicCleanZh} ${activeTopic.en}`,
+          lines: parsed.lines
+        };
+      }
       saveArchive();
 
       currentIndex = 0;
       setStepHighlight(0);
       renderSentence();
-      setStatus('🎉 今日新課程已生成並自動存檔（保存半年）！', '點擊「開始朗讀」開始練習吧！', 'success');
+      setStatus(`🎉 已為「${topicCleanZh}」生成全新內容並存檔（保存半年）！`, '點擊「▶️ 開始朗讀」開始練習吧！', 'success');
     } catch (err) {
       setStatus(`❌ 生成失敗：${err.message}`, '請檢查網路連線或確認 API Key 是否正確');
     } finally {
       btn.disabled = false;
-      btn.textContent = '✨ AI 生成新內容';
+      btn.textContent = '✨ AI 生成此主題新內容';
     }
   }
 
   // ==========================================
-  // 7. 180-DAY ARCHIVE & BACKUP MANAGEMENT
+  // 9. 180-DAY ARCHIVE & BACKUP MANAGEMENT
   // ==========================================
   function renderArchiveList() {
     const listEl = document.getElementById('archiveList');
@@ -1712,6 +2553,7 @@ Requirements:
     currentIndex = 0;
     switchView('today');
     setStepHighlight(0);
+    renderTopicPicker();
     renderSentence();
     setStatus(`已載入 ${dateStr} 的課程紀錄`, '點擊「開始朗讀」開始複習！');
   }
@@ -1746,7 +2588,7 @@ Requirements:
   }
 
   // ==========================================
-  // 8. SETTINGS, DUAL ENGINE UI & SOUND EFFECTS
+  // 10. SETTINGS, DUAL ENGINE UI & SOUND EFFECTS
   // ==========================================
   function selectEngineTab(engine) {
     selectedEngineInModal = engine;
@@ -1900,6 +2742,7 @@ Requirements:
       refreshEnglishVoices();
     }
     loadArchive();
+    renderTopicPicker();
     renderSentence();
   });
 </script>
