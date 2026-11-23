@@ -285,16 +285,23 @@
       font-weight: 800;
       color: #1E293B;
       margin: 12px 0;
-      line-height: 1.4;
+      line-height: 1.5;
       letter-spacing: 0.3px;
     }
 
     .word-span {
       display: inline-block;
-      margin: 0 4px;
-      padding: 2px 6px;
-      border-radius: 8px;
-      transition: all 0.2s;
+      margin: 2px 4px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      transition: all 0.18s ease;
+    }
+
+    .word-speaking {
+      background: #FEF08A;
+      color: #854D0E;
+      transform: scale(1.12);
+      box-shadow: 0 3px 10px rgba(234, 179, 8, 0.35);
     }
 
     .word-correct {
@@ -657,7 +664,7 @@
       <div class="steps-grid">
         <div class="step-item" id="step1"><span class="step-num">1</span>正常語速</div>
         <div class="step-item" id="step2"><span class="step-num">2</span>停 2 秒</div>
-        <div class="step-item" id="step3"><span class="step-num">3</span>清晰慢速</div>
+        <div class="step-item" id="step3"><span class="step-num">3</span>逐字隔1秒</div>
         <div class="step-item" id="step4"><span class="step-num">4</span>停 2 秒</div>
         <div class="step-item" id="step5"><span class="step-num">5</span>孩子跟讀</div>
         <div class="step-item" id="step6"><span class="step-num">6</span>發音確認</div>
@@ -763,14 +770,14 @@
           <label for="cloudTtsKeyInput" style="font-size:0.9rem;">Google Cloud TTS API Key（若空白則自動嘗試共用下方 Gemini Key）</label>
           <input type="password" id="cloudTtsKeyInput" placeholder="貼上已啟用 Cloud Text-to-Speech API 的金鑰（可選填）" />
           <small style="color:var(--muted); display:block; margin-top:4px;">
-            ✨ 支援自動音訊快取：同一句話只會下載一次，反覆練習不重複計費；若無法連線會自動切換回瀏覽器語音。
+            ✨ 支援自動音訊快取：每個單字/句子只會下載一次，反覆練習不重複計費；若無法連線會自動切換回瀏覽器語音。
           </small>
         </div>
       </div>
 
       <div class="voice-preview-row">
         <button type="button" class="btn-sub" style="background:#E0F2FE; border-color:#7DD3FC; color:#0369A1;" onclick="previewCurrentVoiceSetting(false)">🔊 試聽正常語速</button>
-        <button type="button" class="btn-sub" style="background:#FEF3C7; border-color:#FCD34D; color:#92400E;" onclick="previewCurrentVoiceSetting(true)">🐢 試聽清晰慢速</button>
+        <button type="button" class="btn-sub" style="background:#FEF3C7; border-color:#FCD34D; color:#92400E;" onclick="previewCurrentVoiceSetting(true)">🐢 試聽慢速(字間隔1秒)</button>
         <span id="previewStatus" style="font-size:0.85rem; color:var(--muted);"></span>
       </div>
     </div>
@@ -779,9 +786,9 @@
       <label class="checkbox-row">
         <input type="checkbox" id="wordPauseCheck" checked />
         <div>
-          <strong>第 3 步開啟「單字清晰微停頓拆解」</strong>
+          <strong>第 3 步開啟「逐字朗讀（字與字間隔約 1 秒）」</strong>
           <div style="font-size:0.85rem; color:var(--muted); font-weight:normal;">
-            慢速朗讀時在單字之間加入微小氣口停頓，讓幼兒聽清楚每個字的字首與字尾音。
+            慢速步驟時將每個單字獨立念清楚，單字之間精準停頓 1 秒並同步高亮單字，讓孩子聽清每個字音。
           </div>
         </div>
       </label>
@@ -812,6 +819,7 @@
   const CLOUD_KEY_STORAGE = 'kids_english_buddy_cloud_tts_key';
   const WORD_PAUSE_STORAGE = 'kids_english_buddy_word_pause';
   const RETENTION_DAYS = 180; // 半年保存期限
+  const WORD_GAP_MS = 1000;   // 慢速語速單字與單字之間間隔 1 秒
 
   const DEFAULT_LESSON = {
     date: getTodayStr(),
@@ -850,7 +858,7 @@
   let rankedEnglishVoices = [];
   let selectedEngineInModal = 'browser';
   let activeCloudAudio = null;
-  const cloudAudioCache = new Map(); // Cache base64 MP3 data URLs to prevent duplicate API calls
+  const cloudAudioCache = new Map();
 
   function getTodayStr() {
     const d = new Date();
@@ -989,17 +997,6 @@
     return raw === null ? true : raw === 'true';
   }
 
-  function formatSlowArticulationText(text) {
-    if (!isWordPauseEnabled()) return text;
-    const words = text.trim().split(/\s+/);
-    if (words.length <= 1) return text;
-    return words.map((w, idx) => {
-      if (idx === words.length - 1) return w;
-      if (/[,.!?;:]$/.test(w)) return w;
-      return w + ',';
-    }).join(' ');
-  }
-
   // Synthesize via Google Cloud Text-to-Speech REST API
   async function speakWithGoogleCloudTTS(text, rate, token, overrideVoice = null, overrideKey = null) {
     const apiKey = overrideKey !== null ? overrideKey : getCloudApiKey();
@@ -1111,34 +1108,64 @@
       utter.onend = done;
       utter.onerror = done;
 
-      const maxMs = Math.max(4000, text.length * (rate < 0.75 ? 320 : 160));
+      const maxMs = Math.max(3000, text.length * (rate < 0.75 ? 320 : 160));
       setTimeout(done, maxMs);
 
       window.speechSynthesis.speak(utter);
     });
   }
 
-  // Unified speech entry point with automatic fallback
-  async function speakEnglish(text, rate, token) {
+  // Unified single-utterance speech entry point
+  async function speakEnglish(text, rate, token, overrideEngine = null, overrideVoice = null, overrideKey = null) {
     if (token !== loopToken) return false;
+    const engine = overrideEngine || getVoiceEngineMode();
 
-    if (getVoiceEngineMode() === 'cloud') {
+    if (engine === 'cloud') {
       try {
-        return await speakWithGoogleCloudTTS(text, rate, token);
+        return await speakWithGoogleCloudTTS(text, rate, token, overrideVoice, overrideKey);
       } catch (err) {
         console.warn('Cloud TTS fallback to browser TTS:', err.message);
-        document.getElementById('statusSub').textContent = `☁️ 雲端語音暫時無法使用（${err.message}），已自動切換本機語音`;
+        const subEl = document.getElementById('statusSub');
+        if (subEl) subEl.textContent = `☁️ 雲端語音暫時無法使用（${err.message}），已自動切換本機語音`;
         return await speakWithBrowserTTS(text, rate, token);
       }
     }
 
-    return await speakWithBrowserTTS(text, rate, token);
+    return await speakWithBrowserTTS(text, rate, token, overrideVoice);
+  }
+
+  // Step 3: Word-by-word slow articulation with exact 1-second (1000ms) pause between words
+  async function speakSlowWordByWordWith1SecGap(sentence, rate, token, highlightWordsOnCard = true, overrideEngine = null, overrideVoice = null, overrideKey = null) {
+    const words = sentence.trim().split(/\s+/).filter(Boolean);
+    for (let i = 0; i < words.length; i++) {
+      if (token !== loopToken) return false;
+
+      if (highlightWordsOnCard) {
+        renderSentence(null, i);
+      }
+
+      const ok = await speakEnglish(words[i], rate, token, overrideEngine, overrideVoice, overrideKey);
+      if (!ok || token !== loopToken) return false;
+
+      if (i < words.length - 1) {
+        if (highlightWordsOnCard) {
+          renderSentence(null, -1); // Clear highlight during the 1-second gap
+        }
+        const waited = await waitMs(WORD_GAP_MS, token);
+        if (!waited || token !== loopToken) return false;
+      }
+    }
+
+    if (highlightWordsOnCard) {
+      renderSentence(null, -1);
+    }
+    return token === loopToken;
   }
 
   // ==========================================
   // 3. UI RENDERING & NAVIGATION
   // ==========================================
-  function renderSentence(wordStatuses = null) {
+  function renderSentence(wordStatuses = null, speakingWordIndex = -1) {
     const lesson = getCurrentLessonObj();
     const section = lesson[currentMode];
     const line = section.lines[currentIndex];
@@ -1153,6 +1180,7 @@
     const words = line.en.split(/\s+/);
     enContainer.innerHTML = words.map((w, idx) => {
       let cls = 'word-span';
+      if (idx === speakingWordIndex) cls += ' word-speaking';
       if (wordStatuses && wordStatuses[idx] === true) cls += ' word-correct';
       if (wordStatuses && wordStatuses[idx] === false) cls += ' word-retry';
       return `<span class="${cls}">${escapeHtml(w)}</span>`;
@@ -1257,13 +1285,18 @@
     setStatus('⏳ (2/7) 停頓 2 秒...', '在心裡默念一次');
     if (!(await waitMs(2000, myToken))) return;
 
-    // Step 3: Crisp slow articulation
+    // Step 3: Slow articulation (word-by-word with 1-second gap between words)
     setStepHighlight(3);
-    const slowText = formatSlowArticulationText(line.en);
     const isCloud = getVoiceEngineMode() === 'cloud';
-    const slowRate = isCloud ? (isWordPauseEnabled() ? 0.72 : 0.62) : (isWordPauseEnabled() ? 0.68 : 0.56);
-    setStatus('🐢 (3/7) 清晰慢速拆解朗讀中...', '聽清楚每個單字的字首與字尾音');
-    if (!(await speakEnglish(slowText, slowRate, myToken))) return;
+    if (isWordPauseEnabled()) {
+      const wordSlowRate = isCloud ? 0.78 : 0.72;
+      setStatus('🐢 (3/7) 慢速逐字朗讀中（字與字間隔 1 秒）...', '跟著黃色亮起的單字一個字一個字聽清楚');
+      if (!(await speakSlowWordByWordWith1SecGap(line.en, wordSlowRate, myToken, true))) return;
+    } else {
+      const sentenceSlowRate = isCloud ? 0.62 : 0.56;
+      setStatus('🐢 (3/7) 慢速整句朗讀中...', '聽清楚每個單字的發音');
+      if (!(await speakEnglish(line.en, sentenceSlowRate, myToken))) return;
+    }
 
     // Step 4: Pause 2 seconds
     setStepHighlight(4);
@@ -1429,6 +1462,7 @@
   function stopAllAudioAndMic() {
     loopToken++;
     isLoopRunning = false;
+    renderSentence(); // Reset any word highlight
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
     }
@@ -1753,26 +1787,24 @@ Requirements:
   async function previewCurrentVoiceSetting(isSlow) {
     stopAllAudioAndMic();
     const statusEl = document.getElementById('previewStatus');
-    const sample = "Good morning! Three little pigs built three houses.";
-    const usePause = document.getElementById('wordPauseCheck').checked;
-
-    let textToSpeak = sample;
-    if (isSlow && usePause) {
-      textToSpeak = sample.split(/\s+/).map((w, i, arr) => i === arr.length - 1 ? w : w + ',').join(' ');
-    }
-
+    const sample = "Three little pigs built three houses.";
+    const useWordGap = document.getElementById('wordPauseCheck').checked;
     const token = ++loopToken;
 
     if (selectedEngineInModal === 'cloud') {
       const cloudVoice = document.getElementById('cloudVoiceSelect').value;
       const cloudKey = document.getElementById('cloudTtsKeyInput').value.trim() || document.getElementById('apiKeyInput').value.trim();
-      const rate = isSlow ? (usePause ? 0.72 : 0.62) : 0.96;
 
       statusEl.style.color = '#6B21A8';
-      statusEl.textContent = '☁️ 正在合成雲端真人語音...';
+      statusEl.textContent = '☁️ 正在播放雲端真人語音...';
       try {
-        await speakWithGoogleCloudTTS(textToSpeak, rate, token, cloudVoice, cloudKey);
-        statusEl.textContent = '✅ 試聽完成';
+        if (isSlow && useWordGap) {
+          await speakSlowWordByWordWith1SecGap(sample, 0.78, token, false, 'cloud', cloudVoice, cloudKey);
+        } else {
+          const rate = isSlow ? 0.62 : 0.96;
+          await speakWithGoogleCloudTTS(sample, rate, token, cloudVoice, cloudKey);
+        }
+        if (token === loopToken) statusEl.textContent = '✅ 試聽完成';
       } catch (err) {
         statusEl.style.color = '#DC2626';
         statusEl.textContent = `❌ ${err.message}`;
@@ -1780,12 +1812,16 @@ Requirements:
     } else {
       const select = document.getElementById('voiceSelect');
       const chosen = rankedEnglishVoices.find(v => v.voiceURI === select.value) || getSelectedBrowserVoice();
-      const rate = isSlow ? (usePause ? 0.68 : 0.56) : 0.96;
 
       statusEl.style.color = '#0369A1';
       statusEl.textContent = '🖥️ 播放本機語音中...';
-      await speakWithBrowserTTS(textToSpeak, rate, token, chosen);
-      statusEl.textContent = '';
+      if (isSlow && useWordGap) {
+        await speakSlowWordByWordWith1SecGap(sample, 0.72, token, false, 'browser', chosen, null);
+      } else {
+        const rate = isSlow ? 0.56 : 0.96;
+        await speakWithBrowserTTS(sample, rate, token, chosen);
+      }
+      if (token === loopToken) statusEl.textContent = '';
     }
   }
 
