@@ -182,6 +182,25 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .voice-pill {
+      background: #E0F2FE;
+      color: #0369A1;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: bold;
+      cursor: pointer;
+      border: 1px solid #BAE6FD;
+    }
+
+    .voice-pill.cloud {
+      background: #F3E8FF;
+      color: #6B21A8;
+      border-color: #D8B4FE;
     }
 
     .steps-grid {
@@ -492,31 +511,96 @@
       background: white;
       border-radius: 22px;
       padding: 24px;
-      max-width: 480px;
+      max-width: 540px;
       width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
     }
 
     .modal-box h2 {
       margin-top: 0;
+      margin-bottom: 16px;
     }
 
     .form-group {
-      margin-bottom: 14px;
+      margin-bottom: 16px;
     }
 
     .form-group label {
       display: block;
       font-weight: bold;
       margin-bottom: 6px;
+      color: #1E293B;
     }
 
-    .form-group input {
+    .form-group input[type="password"],
+    .form-group input[type="text"],
+    .form-group select {
       width: 100%;
       padding: 10px 12px;
       border: 2px solid var(--border);
       border-radius: 12px;
-      font-size: 1rem;
+      font-size: 0.98rem;
+      background: white;
+    }
+
+    .engine-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .engine-tab {
+      flex: 1;
+      padding: 10px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      background: #F8FAFC;
+      font-weight: bold;
+      cursor: pointer;
+      text-align: center;
+      font-size: 0.92rem;
+    }
+
+    .engine-tab.active {
+      border-color: #8B5CF6;
+      background: #F3E8FF;
+      color: #6B21A8;
+    }
+
+    .engine-box {
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+
+    .voice-preview-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .checkbox-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: #F8FAFC;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+    }
+
+    .checkbox-row input {
+      width: 20px;
+      height: 20px;
+      margin-top: 2px;
+      accent-color: var(--primary);
     }
 
     @media (max-width: 600px) {
@@ -542,7 +626,7 @@
 <header>
   <h1>🦁 小小英文跟讀樂園</h1>
   <div class="header-actions">
-    <button class="icon-btn" onclick="openSettings()">⚙️ 設定</button>
+    <button class="icon-btn" onclick="openSettings()">⚙️ 設定與語音</button>
   </div>
 </header>
 
@@ -567,12 +651,13 @@
     <div class="steps-card">
       <div class="steps-title">
         <span>跟讀互動步驟進度</span>
+        <span class="voice-pill" id="activeVoiceBadge" onclick="openSettings()" title="點擊更換語音引擎">🎙️ 載入語音中...</span>
         <span id="starsCounter">⭐ 今日星星：0</span>
       </div>
       <div class="steps-grid">
         <div class="step-item" id="step1"><span class="step-num">1</span>正常語速</div>
         <div class="step-item" id="step2"><span class="step-num">2</span>停 2 秒</div>
-        <div class="step-item" id="step3"><span class="step-num">3</span>極慢語速</div>
+        <div class="step-item" id="step3"><span class="step-num">3</span>清晰慢速</div>
         <div class="step-item" id="step4"><span class="step-num">4</span>停 2 秒</div>
         <div class="step-item" id="step5"><span class="step-num">5</span>孩子跟讀</div>
         <div class="step-item" id="step6"><span class="step-num">6</span>發音確認</div>
@@ -641,16 +726,74 @@
   </div>
 </div>
 
-<!-- Settings Modal -->
+<!-- Settings & Dual Voice Engine Modal -->
 <div class="modal-backdrop" id="settingsModal">
   <div class="modal-box">
-    <h2>⚙️ 家長設定</h2>
+    <h2>⚙️ 家長設定與雙語音引擎</h2>
+
     <div class="form-group">
-      <label for="apiKeyInput">Gemini API Key（用於每日自動生成新對話與童話）</label>
-      <input type="password" id="apiKeyInput" placeholder="貼上 AIzaSy... 金鑰" />
-      <small style="color:var(--muted);">金鑰僅儲存在此台平板/電腦的瀏覽器本機中，不會上傳至其他伺服器。</small>
+      <label>🗣️ 選擇發音引擎</label>
+      <div class="engine-tabs">
+        <button type="button" class="engine-tab active" id="tabEngineBrowser" onclick="selectEngineTab('browser')">🖥️ 瀏覽器自然語音（免費）</button>
+        <button type="button" class="engine-tab" id="tabEngineCloud" onclick="selectEngineTab('cloud')">☁️ Google Cloud 真人語音</button>
+      </div>
+
+      <!-- Browser TTS Panel -->
+      <div class="engine-box" id="panelEngineBrowser">
+        <label for="voiceSelect" style="font-size:0.9rem;">選擇美式英語語音包（已自動將自然清晰女聲排在最上方）</label>
+        <select id="voiceSelect"></select>
+        <small style="color:var(--muted); display:block; margin-top:6px;">
+          💡 建議選擇含有 <strong>Google US English</strong>、<strong>Natural</strong>、<strong>Ava</strong>、<strong>Jenny</strong> 或 <strong>Samantha</strong> 字樣的語音。
+        </small>
+      </div>
+
+      <!-- Google Cloud TTS Panel -->
+      <div class="engine-box" id="panelEngineCloud" style="display:none;">
+        <div style="margin-bottom:10px;">
+          <label for="cloudVoiceSelect" style="font-size:0.9rem;">選擇 Google Cloud 神經網路真人聲音</label>
+          <select id="cloudVoiceSelect">
+            <option value="en-US-Neural2-F">⭐ en-US-Neural2-F（溫柔自然美式女聲 · 推薦幼兒老師）</option>
+            <option value="en-US-Studio-O">🎙️ en-US-Studio-O（高解析度錄音室女聲 · 極致清晰）</option>
+            <option value="en-US-Neural2-H">👧 en-US-Neural2-H（活潑明亮美式女聲）</option>
+            <option value="en-US-Neural2-J">👨 en-US-Neural2-J（親切溫暖美式男聲）</option>
+            <option value="en-US-Studio-Q">🎙️ en-US-Studio-Q（高解析度錄音室男聲）</option>
+          </select>
+        </div>
+        <div>
+          <label for="cloudTtsKeyInput" style="font-size:0.9rem;">Google Cloud TTS API Key（若空白則自動嘗試共用下方 Gemini Key）</label>
+          <input type="password" id="cloudTtsKeyInput" placeholder="貼上已啟用 Cloud Text-to-Speech API 的金鑰（可選填）" />
+          <small style="color:var(--muted); display:block; margin-top:4px;">
+            ✨ 支援自動音訊快取：同一句話只會下載一次，反覆練習不重複計費；若無法連線會自動切換回瀏覽器語音。
+          </small>
+        </div>
+      </div>
+
+      <div class="voice-preview-row">
+        <button type="button" class="btn-sub" style="background:#E0F2FE; border-color:#7DD3FC; color:#0369A1;" onclick="previewCurrentVoiceSetting(false)">🔊 試聽正常語速</button>
+        <button type="button" class="btn-sub" style="background:#FEF3C7; border-color:#FCD34D; color:#92400E;" onclick="previewCurrentVoiceSetting(true)">🐢 試聽清晰慢速</button>
+        <span id="previewStatus" style="font-size:0.85rem; color:var(--muted);"></span>
+      </div>
     </div>
-    <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:18px;">
+
+    <div class="form-group">
+      <label class="checkbox-row">
+        <input type="checkbox" id="wordPauseCheck" checked />
+        <div>
+          <strong>第 3 步開啟「單字清晰微停頓拆解」</strong>
+          <div style="font-size:0.85rem; color:var(--muted); font-weight:normal;">
+            慢速朗讀時在單字之間加入微小氣口停頓，讓幼兒聽清楚每個字的字首與字尾音。
+          </div>
+        </div>
+      </label>
+    </div>
+
+    <div class="form-group">
+      <label for="apiKeyInput">🔑 Gemini API Key（用於每日自動生成新對話與童話）</label>
+      <input type="password" id="apiKeyInput" placeholder="貼上 AIzaSy... 金鑰" />
+      <small style="color:var(--muted);">所有金鑰僅儲存在此台平板/電腦的瀏覽器本機中，不會上傳至其他伺服器。</small>
+    </div>
+
+    <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
       <button class="btn-sub" onclick="closeSettings()">取消</button>
       <button class="btn-large btn-start" style="padding:10px 20px; font-size:1rem;" onclick="saveSettings()">儲存設定</button>
     </div>
@@ -663,6 +806,11 @@
   // ==========================================
   const STORAGE_KEY = 'kids_english_buddy_archive_v1';
   const API_KEY_STORAGE = 'kids_english_buddy_gemini_key';
+  const VOICE_ENGINE_STORAGE = 'kids_english_buddy_voice_engine'; // 'browser' | 'cloud'
+  const VOICE_PREF_STORAGE = 'kids_english_buddy_voice_uri';
+  const CLOUD_VOICE_STORAGE = 'kids_english_buddy_cloud_voice';
+  const CLOUD_KEY_STORAGE = 'kids_english_buddy_cloud_tts_key';
+  const WORD_PAUSE_STORAGE = 'kids_english_buddy_word_pause';
   const RETENTION_DAYS = 180; // 半年保存期限
 
   const DEFAULT_LESSON = {
@@ -699,6 +847,10 @@
   let loopToken = 0;
   let activeRecognition = null;
   let diagRecognition = null;
+  let rankedEnglishVoices = [];
+  let selectedEngineInModal = 'browser';
+  let activeCloudAudio = null;
+  const cloudAudioCache = new Map(); // Cache base64 MP3 data URLs to prevent duplicate API calls
 
   function getTodayStr() {
     const d = new Date();
@@ -754,7 +906,237 @@
   }
 
   // ==========================================
-  // 2. UI RENDERING & NAVIGATION
+  // 2. DUAL VOICE ENGINE (BROWSER + CLOUD TTS)
+  // ==========================================
+  function getVoiceEngineMode() {
+    return localStorage.getItem(VOICE_ENGINE_STORAGE) || 'browser';
+  }
+
+  function getCloudVoiceName() {
+    return localStorage.getItem(CLOUD_VOICE_STORAGE) || 'en-US-Neural2-F';
+  }
+
+  function getCloudApiKey() {
+    const dedicated = (localStorage.getItem(CLOUD_KEY_STORAGE) || '').trim();
+    if (dedicated) return dedicated;
+    return (localStorage.getItem(API_KEY_STORAGE) || '').trim();
+  }
+
+  function scoreEnglishVoice(v) {
+    let score = 0;
+    const name = v.name.toLowerCase();
+    const lang = v.lang.toLowerCase();
+
+    if (lang === 'en-us' || lang === 'en_us') score += 50;
+    else if (lang.startsWith('en')) score += 20;
+    else return -1;
+
+    if (name.includes('natural')) score += 45;
+    if (name.includes('google us english')) score += 42;
+    if (name.includes('ava') || name.includes('jenny') || name.includes('aria') || name.includes('samantha') || name.includes('emma') || name.includes('michelle')) score += 35;
+    if (name.includes('female') || name.includes('woman') || name.includes('zira') || name.includes('joanna') || name.includes('salli')) score += 20;
+    if (name.includes('google')) score += 15;
+    if (name.includes('online')) score += 10;
+
+    if (name.includes('espeak') || name.includes('compact') || name.includes('fred') || name.includes('albert')) score -= 40;
+
+    return score;
+  }
+
+  function refreshEnglishVoices() {
+    if ('speechSynthesis' in window) {
+      const allVoices = window.speechSynthesis.getVoices();
+      rankedEnglishVoices = allVoices
+        .map(v => ({ voice: v, score: scoreEnglishVoice(v) }))
+        .filter(item => item.score >= 0)
+        .sort((a, b) => b.score - a.score)
+        .map(item => item.voice);
+    }
+
+    const badge = document.getElementById('activeVoiceBadge');
+    if (!badge) return;
+
+    if (getVoiceEngineMode() === 'cloud') {
+      const cv = getCloudVoiceName().replace('en-US-', '');
+      badge.className = 'voice-pill cloud';
+      badge.textContent = `☁️ Cloud ${cv}`;
+    } else {
+      badge.className = 'voice-pill';
+      const best = getSelectedBrowserVoice();
+      if (best) {
+        const shortName = best.name.replace(/Microsoft |Google |Online \(Natural\) - /g, '').slice(0, 22);
+        badge.textContent = `🖥️ ${shortName}`;
+      } else {
+        badge.textContent = '🖥️ 瀏覽器英語語音';
+      }
+    }
+  }
+
+  function getSelectedBrowserVoice() {
+    if (rankedEnglishVoices.length === 0) {
+      refreshEnglishVoices();
+    }
+    const savedUri = localStorage.getItem(VOICE_PREF_STORAGE);
+    if (savedUri) {
+      const found = rankedEnglishVoices.find(v => v.voiceURI === savedUri);
+      if (found) return found;
+    }
+    return rankedEnglishVoices[0] || null;
+  }
+
+  function isWordPauseEnabled() {
+    const raw = localStorage.getItem(WORD_PAUSE_STORAGE);
+    return raw === null ? true : raw === 'true';
+  }
+
+  function formatSlowArticulationText(text) {
+    if (!isWordPauseEnabled()) return text;
+    const words = text.trim().split(/\s+/);
+    if (words.length <= 1) return text;
+    return words.map((w, idx) => {
+      if (idx === words.length - 1) return w;
+      if (/[,.!?;:]$/.test(w)) return w;
+      return w + ',';
+    }).join(' ');
+  }
+
+  // Synthesize via Google Cloud Text-to-Speech REST API
+  async function speakWithGoogleCloudTTS(text, rate, token, overrideVoice = null, overrideKey = null) {
+    const apiKey = overrideKey !== null ? overrideKey : getCloudApiKey();
+    const voiceName = overrideVoice || getCloudVoiceName();
+
+    if (!apiKey) {
+      throw new Error('未設定 Google Cloud / Gemini API Key');
+    }
+
+    const cacheKey = `${voiceName}|${rate.toFixed(2)}|${text}`;
+    let audioSrc = cloudAudioCache.get(cacheKey);
+
+    if (!audioSrc) {
+      const payload = {
+        input: { text: text },
+        voice: {
+          languageCode: 'en-US',
+          name: voiceName
+        },
+        audioConfig: {
+          audioEncoding: 'MP3',
+          speakingRate: rate,
+          pitch: voiceName.includes('Studio') ? 0.0 : 0.8
+        }
+      };
+
+      const res = await fetch(`https://texttospeech.googleapis.com/v1/text:synthesize?key=${encodeURIComponent(apiKey)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) {
+        const errObj = await res.json().catch(() => ({}));
+        throw new Error(errObj.error?.message || `Cloud TTS HTTP ${res.status}`);
+      }
+
+      const data = await res.json();
+      if (!data.audioContent) {
+        throw new Error('Cloud TTS 未回傳音訊內容');
+      }
+
+      audioSrc = `data:audio/mp3;base64,${data.audioContent}`;
+      cloudAudioCache.set(cacheKey, audioSrc);
+    }
+
+    if (token !== loopToken) return false;
+
+    return new Promise((resolve, reject) => {
+      if (activeCloudAudio) {
+        try { activeCloudAudio.pause(); } catch (e) {}
+      }
+      const audio = new Audio(audioSrc);
+      activeCloudAudio = audio;
+
+      let settled = false;
+      const finish = (ok) => {
+        if (!settled) {
+          settled = true;
+          activeCloudAudio = null;
+          resolve(ok && token === loopToken);
+        }
+      };
+
+      audio.onended = () => finish(true);
+      audio.onerror = () => {
+        if (!settled) {
+          settled = true;
+          activeCloudAudio = null;
+          reject(new Error('Cloud MP3 音訊播放失敗'));
+        }
+      };
+
+      audio.play().catch(err => {
+        if (!settled) {
+          settled = true;
+          activeCloudAudio = null;
+          reject(err);
+        }
+      });
+    });
+  }
+
+  function speakWithBrowserTTS(text, rate, token, customVoice = null) {
+    return new Promise((resolve) => {
+      if (token !== loopToken) return resolve(false);
+      if (!('speechSynthesis' in window)) {
+        setStatus('⚠️ 此瀏覽器不支援語音朗讀 (TTS)', '請改用 Chrome 瀏覽器開啟');
+        return resolve(false);
+      }
+
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = 'en-US';
+      utter.rate = rate;
+      utter.pitch = 1.04;
+
+      const chosenVoice = customVoice || getSelectedBrowserVoice();
+      if (chosenVoice) utter.voice = chosenVoice;
+
+      let finished = false;
+      const done = () => {
+        if (!finished) {
+          finished = true;
+          resolve(token === loopToken);
+        }
+      };
+
+      utter.onend = done;
+      utter.onerror = done;
+
+      const maxMs = Math.max(4000, text.length * (rate < 0.75 ? 320 : 160));
+      setTimeout(done, maxMs);
+
+      window.speechSynthesis.speak(utter);
+    });
+  }
+
+  // Unified speech entry point with automatic fallback
+  async function speakEnglish(text, rate, token) {
+    if (token !== loopToken) return false;
+
+    if (getVoiceEngineMode() === 'cloud') {
+      try {
+        return await speakWithGoogleCloudTTS(text, rate, token);
+      } catch (err) {
+        console.warn('Cloud TTS fallback to browser TTS:', err.message);
+        document.getElementById('statusSub').textContent = `☁️ 雲端語音暫時無法使用（${err.message}），已自動切換本機語音`;
+        return await speakWithBrowserTTS(text, rate, token);
+      }
+    }
+
+    return await speakWithBrowserTTS(text, rate, token);
+  }
+
+  // ==========================================
+  // 3. UI RENDERING & NAVIGATION
   // ==========================================
   function renderSentence(wordStatuses = null) {
     const lesson = getCurrentLessonObj();
@@ -848,46 +1230,8 @@
   }
 
   // ==========================================
-  // 3. SPEECH SYNTHESIS (TTS) & 7-STEP ENGINE
+  // 4. 7-STEP GUIDED SHADOWING LOOP
   // ==========================================
-  function speakEnglish(text, rate, token) {
-    return new Promise((resolve) => {
-      if (token !== loopToken) return resolve(false);
-      if (!('speechSynthesis' in window)) {
-        setStatus('⚠️ 此瀏覽器不支援語音朗讀 (TTS)', '請改用 Chrome 瀏覽器開啟');
-        return resolve(false);
-      }
-
-      window.speechSynthesis.cancel();
-      const utter = new SpeechSynthesisUtterance(text);
-      utter.lang = 'en-US';
-      utter.rate = rate;
-      utter.pitch = 1.05;
-
-      const voices = window.speechSynthesis.getVoices();
-      const enVoice = voices.find(v => v.lang.includes('en-US') && (v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Samantha')))
-                   || voices.find(v => v.lang.startsWith('en'));
-      if (enVoice) utter.voice = enVoice;
-
-      let finished = false;
-      const done = () => {
-        if (!finished) {
-          finished = true;
-          resolve(token === loopToken);
-        }
-      };
-
-      utter.onend = done;
-      utter.onerror = done;
-
-      // Fallback timeout in case Android TTS hangs
-      const maxMs = Math.max(3500, text.length * (rate < 0.7 ? 260 : 150));
-      setTimeout(done, maxMs);
-
-      window.speechSynthesis.speak(utter);
-    });
-  }
-
   function waitMs(ms, token) {
     return new Promise((resolve) => {
       setTimeout(() => resolve(token === loopToken), ms);
@@ -903,20 +1247,23 @@
     const line = getCurrentLines()[currentIndex];
     renderSentence();
 
-    // Step 1: Normal speed
+    // Step 1: Normal natural speed
     setStepHighlight(1);
-    setStatus('🔊 (1/7) 正常語速朗讀中...', '請仔細聽老師念一遍');
-    if (!(await speakEnglish(line.en, 0.95, myToken))) return;
+    setStatus('🔊 (1/7) 正常自然語速朗讀中...', '請仔細聽老師念一遍');
+    if (!(await speakEnglish(line.en, 0.96, myToken))) return;
 
     // Step 2: Pause 2 seconds
     setStepHighlight(2);
     setStatus('⏳ (2/7) 停頓 2 秒...', '在心裡默念一次');
     if (!(await waitMs(2000, myToken))) return;
 
-    // Step 3: Very slow speed
+    // Step 3: Crisp slow articulation
     setStepHighlight(3);
-    setStatus('🐢 (3/7) 極慢語速朗讀中...', '聽清楚每個單字的發音');
-    if (!(await speakEnglish(line.en, 0.55, myToken))) return;
+    const slowText = formatSlowArticulationText(line.en);
+    const isCloud = getVoiceEngineMode() === 'cloud';
+    const slowRate = isCloud ? (isWordPauseEnabled() ? 0.72 : 0.62) : (isWordPauseEnabled() ? 0.68 : 0.56);
+    setStatus('🐢 (3/7) 清晰慢速拆解朗讀中...', '聽清楚每個單字的字首與字尾音');
+    if (!(await speakEnglish(slowText, slowRate, myToken))) return;
 
     // Step 4: Pause 2 seconds
     setStepHighlight(4);
@@ -1046,7 +1393,6 @@
     } catch (e) {}
   }
 
-  // Child-friendly pronunciation matcher
   function evaluateChildPronunciation(target, spoken) {
     const clean = (s) => s.toLowerCase().replace(/[^a-z0-9\s']/g, '').trim();
     const targetWords = clean(target).split(/\s+/).filter(Boolean);
@@ -1086,6 +1432,10 @@
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
     }
+    if (activeCloudAudio) {
+      try { activeCloudAudio.pause(); } catch (e) {}
+      activeCloudAudio = null;
+    }
     if (activeRecognition) {
       try { activeRecognition.abort(); } catch (e) {}
       activeRecognition = null;
@@ -1093,7 +1443,7 @@
   }
 
   // ==========================================
-  // 4. STANDALONE MICROPHONE DIAGNOSTIC TOOL
+  // 5. STANDALONE MICROPHONE DIAGNOSTIC TOOL
   // ==========================================
   function mapSpeechErrorToChinese(errCode) {
     const map = {
@@ -1123,7 +1473,6 @@
     panel.classList.add('open');
     elTranscript.style.display = 'none';
 
-    // 1. Check URL Protocol / Origin
     const proto = window.location.protocol;
     const hrefPreview = window.location.href.slice(0, 45);
     if (proto === 'file:' || proto === 'content:') {
@@ -1134,7 +1483,6 @@
       elOrigin.innerHTML = `✅ <strong>網址協定正常 (${proto})</strong>：符合瀏覽器安全來源規範。`;
     }
 
-    // 2. Check SpeechRecognition API Support
     const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRec) {
       elSupport.className = 'diag-row diag-error';
@@ -1147,7 +1495,6 @@
       elSupport.innerHTML = `✅ <strong>語音辨識引擎存在</strong>：偵測到瀏覽器支援 SpeechRecognition。`;
     }
 
-    // 3. Probe Hardware Microphone via getUserMedia first (triggers permission prompt clearly)
     elStatus.className = 'diag-row';
     elStatus.innerHTML = '⏳ 正在向平板請求麥克風硬體權限...';
 
@@ -1162,7 +1509,6 @@
       }
     }
 
-    // 4. Start Live Speech Recognition Test
     const rec = new SpeechRec();
     diagRecognition = rec;
     rec.lang = 'en-US';
@@ -1211,12 +1557,12 @@
   }
 
   // ==========================================
-  // 5. GEMINI API DAILY CONTENT GENERATOR
+  // 6. GEMINI API DAILY CONTENT GENERATOR
   // ==========================================
   async function generateNewDailyLesson() {
     const apiKey = localStorage.getItem(API_KEY_STORAGE);
     if (!apiKey) {
-      alert('請先點擊右上角「⚙️ 設定」輸入您的 Gemini API Key，即可每日自動生成全新對話與童話！');
+      alert('請先點擊右上角「⚙️ 設定與語音」輸入您的 Gemini API Key，即可每日自動生成全新對話與童話！');
       openSettings();
       return;
     }
@@ -1297,7 +1643,7 @@ Requirements:
   }
 
   // ==========================================
-  // 6. 180-DAY ARCHIVE & BACKUP MANAGEMENT
+  // 7. 180-DAY ARCHIVE & BACKUP MANAGEMENT
   // ==========================================
   function renderArchiveList() {
     const listEl = document.getElementById('archiveList');
@@ -1366,26 +1712,119 @@ Requirements:
   }
 
   // ==========================================
-  // 7. SETTINGS & SOUND EFFECTS
+  // 8. SETTINGS, DUAL ENGINE UI & SOUND EFFECTS
   // ==========================================
+  function selectEngineTab(engine) {
+    selectedEngineInModal = engine;
+    document.getElementById('tabEngineBrowser').classList.toggle('active', engine === 'browser');
+    document.getElementById('tabEngineCloud').classList.toggle('active', engine === 'cloud');
+    document.getElementById('panelEngineBrowser').style.display = engine === 'browser' ? 'block' : 'none';
+    document.getElementById('panelEngineCloud').style.display = engine === 'cloud' ? 'block' : 'none';
+    document.getElementById('previewStatus').textContent = '';
+  }
+
   function openSettings() {
+    refreshEnglishVoices();
+    const select = document.getElementById('voiceSelect');
+    const currentSelected = getSelectedBrowserVoice();
+
+    if (rankedEnglishVoices.length === 0) {
+      select.innerHTML = '<option value="">（使用瀏覽器預設英語語音）</option>';
+    } else {
+      select.innerHTML = rankedEnglishVoices.map((v, idx) => {
+        const tag = idx === 0 ? '⭐ 推薦首選 · ' : '';
+        return `<option value="${escapeHtml(v.voiceURI)}">${tag}${escapeHtml(v.name)} (${escapeHtml(v.lang)})</option>`;
+      }).join('');
+      if (currentSelected) {
+        select.value = currentSelected.voiceURI;
+      }
+    }
+
+    document.getElementById('cloudVoiceSelect').value = getCloudVoiceName();
+    document.getElementById('cloudTtsKeyInput').value = localStorage.getItem(CLOUD_KEY_STORAGE) || '';
+    document.getElementById('wordPauseCheck').checked = isWordPauseEnabled();
     document.getElementById('apiKeyInput').value = localStorage.getItem(API_KEY_STORAGE) || '';
+    document.getElementById('previewStatus').textContent = '';
+
+    selectEngineTab(getVoiceEngineMode());
     document.getElementById('settingsModal').classList.add('open');
   }
 
+  async function previewCurrentVoiceSetting(isSlow) {
+    stopAllAudioAndMic();
+    const statusEl = document.getElementById('previewStatus');
+    const sample = "Good morning! Three little pigs built three houses.";
+    const usePause = document.getElementById('wordPauseCheck').checked;
+
+    let textToSpeak = sample;
+    if (isSlow && usePause) {
+      textToSpeak = sample.split(/\s+/).map((w, i, arr) => i === arr.length - 1 ? w : w + ',').join(' ');
+    }
+
+    const token = ++loopToken;
+
+    if (selectedEngineInModal === 'cloud') {
+      const cloudVoice = document.getElementById('cloudVoiceSelect').value;
+      const cloudKey = document.getElementById('cloudTtsKeyInput').value.trim() || document.getElementById('apiKeyInput').value.trim();
+      const rate = isSlow ? (usePause ? 0.72 : 0.62) : 0.96;
+
+      statusEl.style.color = '#6B21A8';
+      statusEl.textContent = '☁️ 正在合成雲端真人語音...';
+      try {
+        await speakWithGoogleCloudTTS(textToSpeak, rate, token, cloudVoice, cloudKey);
+        statusEl.textContent = '✅ 試聽完成';
+      } catch (err) {
+        statusEl.style.color = '#DC2626';
+        statusEl.textContent = `❌ ${err.message}`;
+      }
+    } else {
+      const select = document.getElementById('voiceSelect');
+      const chosen = rankedEnglishVoices.find(v => v.voiceURI === select.value) || getSelectedBrowserVoice();
+      const rate = isSlow ? (usePause ? 0.68 : 0.56) : 0.96;
+
+      statusEl.style.color = '#0369A1';
+      statusEl.textContent = '🖥️ 播放本機語音中...';
+      await speakWithBrowserTTS(textToSpeak, rate, token, chosen);
+      statusEl.textContent = '';
+    }
+  }
+
   function closeSettings() {
+    stopAllAudioAndMic();
     document.getElementById('settingsModal').classList.remove('open');
   }
 
   function saveSettings() {
+    localStorage.setItem(VOICE_ENGINE_STORAGE, selectedEngineInModal);
+
+    const select = document.getElementById('voiceSelect');
+    if (select.value) {
+      localStorage.setItem(VOICE_PREF_STORAGE, select.value);
+    }
+
+    const cloudVoice = document.getElementById('cloudVoiceSelect').value;
+    localStorage.setItem(CLOUD_VOICE_STORAGE, cloudVoice);
+
+    const cloudKey = document.getElementById('cloudTtsKeyInput').value.trim();
+    if (cloudKey) {
+      localStorage.setItem(CLOUD_KEY_STORAGE, cloudKey);
+    } else {
+      localStorage.removeItem(CLOUD_KEY_STORAGE);
+    }
+
+    const usePause = document.getElementById('wordPauseCheck').checked;
+    localStorage.setItem(WORD_PAUSE_STORAGE, String(usePause));
+
     const val = document.getElementById('apiKeyInput').value.trim();
     if (val) {
       localStorage.setItem(API_KEY_STORAGE, val);
     } else {
       localStorage.removeItem(API_KEY_STORAGE);
     }
+
+    refreshEnglishVoices();
     closeSettings();
-    alert('設定已儲存！');
+    alert('設定與雙語音引擎偏好已儲存！');
   }
 
   function playChime(isSuccess) {
@@ -1419,7 +1858,10 @@ Requirements:
   // Initialize on load
   window.addEventListener('DOMContentLoaded', () => {
     if ('speechSynthesis' in window) {
-      window.speechSynthesis.getVoices();
+      refreshEnglishVoices();
+      window.speechSynthesis.onvoiceschanged = refreshEnglishVoices;
+    } else {
+      refreshEnglishVoices();
     }
     loadArchive();
     renderSentence();
