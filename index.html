@@ -12,6 +12,8 @@
       --primary-dark: #E56B1F;
       --secondary: #38BDF8;
       --secondary-dark: #0284C7;
+      --phonics: #10B981;
+      --phonics-dark: #047857;
       --success: #22C55E;
       --warning: #F59E0B;
       --danger: #EF4444;
@@ -134,16 +136,17 @@
 
     .mode-switch {
       display: flex;
+      flex-wrap: wrap;
       gap: 8px;
     }
 
     .mode-btn {
-      padding: 10px 16px;
+      padding: 10px 14px;
       border-radius: 14px;
       border: 2px solid #E2E8F0;
       background: #F8FAFC;
       font-weight: bold;
-      font-size: 1rem;
+      font-size: 0.96rem;
       cursor: pointer;
       color: var(--text);
     }
@@ -151,6 +154,12 @@
     .mode-btn.active {
       background: var(--secondary);
       border-color: var(--secondary);
+      color: white;
+    }
+
+    .mode-btn.phonics-mode.active {
+      background: var(--phonics);
+      border-color: var(--phonics);
       color: white;
     }
 
@@ -188,7 +197,7 @@
       cursor: not-allowed;
     }
 
-    /* 30-Topic Picker Grid Card */
+    /* Topic Picker Grid Card */
     .topic-picker-card {
       background: white;
       border-radius: 22px;
@@ -264,6 +273,9 @@
       .topic-grid {
         grid-template-columns: repeat(5, 1fr);
       }
+      .topic-grid.phonics-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
     }
 
     .topic-chip {
@@ -300,6 +312,12 @@
       box-shadow: 0 4px 12px rgba(255, 138, 61, 0.25);
     }
 
+    .topic-chip.phonics-chip.selected {
+      border-color: var(--phonics);
+      background: #ECFDF5;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+    }
+
     .topic-chip .t-emoji {
       font-size: 1.8rem;
       line-height: 1.1;
@@ -318,6 +336,40 @@
       color: var(--muted);
       line-height: 1.2;
       pointer-events: none;
+    }
+
+    /* Phonics Rule Banner */
+    .phonics-rule-box {
+      background: linear-gradient(135deg, #ECFDF5 0%, #FEFCE8 100%);
+      border: 2px solid #6EE7B7;
+      border-radius: 16px;
+      padding: 12px 16px;
+      margin: 0 auto 14px auto;
+      max-width: 680px;
+      text-align: center;
+    }
+
+    .phonics-rule-stage {
+      display: inline-block;
+      background: var(--phonics);
+      color: white;
+      font-size: 0.8rem;
+      font-weight: bold;
+      padding: 2px 10px;
+      border-radius: 999px;
+      margin-bottom: 4px;
+    }
+
+    .phonics-rule-mantra {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #065F46;
+      margin: 2px 0;
+    }
+
+    .phonics-rule-examples {
+      font-size: 0.88rem;
+      color: #475569;
     }
 
     /* 7-Step Progress Indicator */
@@ -422,6 +474,11 @@
       padding: 4px 12px;
       border-radius: 999px;
       font-weight: bold;
+    }
+
+    .badge.phonics-badge {
+      background: #D1FAE5;
+      color: #065F46;
     }
 
     .speaker-avatar {
@@ -806,6 +863,7 @@
       <div class="mode-switch">
         <button type="button" class="mode-btn active" id="btnModeDialog" onclick="switchMode('dialogue')">💬 日常情境 (30種)</button>
         <button type="button" class="mode-btn" id="btnModeStory" onclick="switchMode('story')">📖 經典童話 (30篇)</button>
+        <button type="button" class="mode-btn phonics-mode" id="btnModePhonics" onclick="switchMode('phonics')">🔤 自然發音規則 (12類)</button>
       </div>
       <div class="top-right-actions">
         <button type="button" class="picker-toggle-btn" id="btnTogglePicker" onclick="toggleTopicPicker()">📋 收合主題選單</button>
@@ -813,16 +871,16 @@
       </div>
     </div>
 
-    <!-- 30-OPTION TOPIC PICKER -->
+    <!-- TOPIC PICKER -->
     <div class="topic-picker-card" id="topicPickerCard">
       <div class="topic-picker-header">
         <h2 id="topicPickerTitle">💬 請點選 1 種生活情境（共 30 種）</h2>
       </div>
-      <div class="topic-filter-row">
+      <div class="topic-filter-row" id="topicFilterRow">
         <button type="button" class="range-btn active" id="btnRangeAll" onclick="setTopicRange('all')">全部 (1~30)</button>
         <button type="button" class="range-btn" id="btnRange1" onclick="setTopicRange('1-15')">第 1~15 個</button>
         <button type="button" class="range-btn" id="btnRange2" onclick="setTopicRange('16-30')">第 16~30 個</button>
-        <input type="text" class="topic-search-input" id="topicSearchInput" placeholder="🔍 搜尋關鍵字（如：動物園、小豬...）" oninput="renderTopicPicker()" />
+        <input type="text" class="topic-search-input" id="topicSearchInput" placeholder="🔍 搜尋關鍵字（如：動物園、Magic E...）" oninput="renderTopicPicker()" />
         <button type="button" class="btn-sub" style="padding:6px 12px;" onclick="clearTopicSearch()">清除</button>
       </div>
       <div class="topic-grid" id="topicGrid"></div>
@@ -851,6 +909,13 @@
       <div class="lesson-meta">
         <span class="badge" id="lessonTitle">載入中...</span>
         <span id="sentenceProgress">第 1 / 5 句</span>
+      </div>
+
+      <!-- Phonics Mantra Callout (Visible only in Phonics Mode) -->
+      <div class="phonics-rule-box" id="phonicsRuleBox" style="display:none;">
+        <div class="phonics-rule-stage" id="phonicsStageText">階段② 短母音 CVC</div>
+        <div class="phonics-rule-mantra" id="phonicsMantraText">💡 口訣：一個母音被子音夾住，唸短音</div>
+        <div class="phonics-rule-examples" id="phonicsExampleText">代表例字：cat · bed · sit · dog · sun</div>
       </div>
 
       <div class="speaker-avatar" id="speakerAvatar">🧸</div>
@@ -969,7 +1034,7 @@
     </div>
 
     <div class="form-group">
-      <label for="apiKeyInput">🔑 Gemini API Key（用於依所選主題生成全新對話與童話）</label>
+      <label for="apiKeyInput">🔑 Gemini API Key（用於依所選主題或發音規則生成全新內容）</label>
       <input type="password" id="apiKeyInput" placeholder="貼上 AIzaSy... 金鑰" />
       <small style="color:var(--muted);">所有金鑰僅儲存在此台平板/電腦的瀏覽器本機中，不會上傳至其他伺服器。</small>
     </div>
@@ -983,7 +1048,7 @@
 
 <script>
   // ==========================================
-  // 1. 30 DIALOGUE SCENARIOS & 30 FAIRY TALES
+  // 1. 30 DIALOGUE SCENARIOS, 30 FAIRY TALES, & 12 PHONICS RULES
   // ==========================================
   const DIALOGUE_TOPICS = [
     {
@@ -1591,27 +1656,189 @@
     }
   ];
 
+  // 12 PHONICS RULES FROM ATTACHED CHART (ae-phonics-rules-chart-a4.pdf)
+  const PHONICS_TOPICS = [
+    {
+      id: "p1", emoji: "🐱", zh: "1. 短母音 (CVC)", en: "Short Vowels CVC",
+      stage: "階段② 短母音 CVC（a, e, i, o, u）",
+      mantra: "💡 口訣：一個母音被子音夾住，唸短音",
+      examples: "代表例字：cat · bed · sit · dog · sun",
+      lines: [
+        { speaker: "短音 a", avatar: "🐱", en: "cat, hat, map! A fat cat sat on a map.", zh: "短母音 a：貓咪、帽子、地圖！一隻胖貓坐在地圖上。" },
+        { speaker: "短音 e", avatar: "🛏️", en: "bed, red, pen! A red pen is on the bed.", zh: "短母音 e：床、紅色、原子筆！一支紅筆在床上。" },
+        { speaker: "短音 i", avatar: "🐷", en: "pig, sit, big! A big pig likes to sit.", zh: "短母音 i：小豬、坐下、大！一隻大豬喜歡坐著。" },
+        { speaker: "短音 o", avatar: "🐶", en: "dog, hot, top! A hot dog is on the top.", zh: "短母音 o：小狗、熱、頂端！一隻熱狗在最上面。" },
+        { speaker: "短音 u", avatar: "☀️", en: "sun, cup, bus! A yellow bus in the sun.", zh: "短母音 u：太陽、杯子、公車！陽光下的一輛黃色公車。" }
+      ]
+    },
+    {
+      id: "p2", emoji: "🪄", zh: "2. Magic E 魔法e", en: "Magic E (Silent E)",
+      stage: "階段③ 長母音：Magic E",
+      mantra: "💡 口訣：字尾 e 不出聲，前面母音唸自己的名字",
+      examples: "代表例字：cap → cape · kit → kite · hop → hope · cub → cube · tap → tape",
+      lines: [
+        { speaker: "a_e 長音A", avatar: "🦸", en: "cap becomes cape! The hero wears a red cape.", zh: "短音 cap 變長音 cape！英雄披著紅色斗篷。" },
+        { speaker: "i_e 長音I", avatar: "🪁", en: "kit becomes kite! Fly a high kite in the sky.", zh: "短音 kit 變長音 kite！在天空中放高高的風箏。" },
+        { speaker: "o_e 長音O", avatar: "🐰", en: "hop becomes hope! Little bunnies hop with hope.", zh: "短音 hop 變長音 hope！小兔子帶著希望蹦蹦跳。" },
+        { speaker: "u_e 長音U", avatar: "🧊", en: "cub becomes cube! A bear cub plays with an ice cube.", zh: "短音 cub 變長音 cube！小熊寶寶玩著一塊冰塊。" },
+        { speaker: "a_e 長音A", avatar: "📼", en: "tap becomes tape! Tap the table and stick the tape.", zh: "短音 tap 變長音 tape！輕拍桌子並貼上膠帶。" }
+      ]
+    },
+    {
+      id: "p3", emoji: "⛵", zh: "3. 母音組合", en: "Vowel Teams",
+      stage: "階段④ 長母音：母音組合（ai/ay, ee/ea, oa/ow, igh）",
+      mantra: "💡 口訣：兩個母音走在一起，第一個說話、第二個沉默",
+      examples: "代表例字：rain · play · see · boat · night",
+      lines: [
+        { speaker: "ai 長音A", avatar: "🌧️", en: "rain, train, snail! A snail rides a train in the rain.", zh: "ai 發長音 A：下雨、火車、蝸牛！蝸牛在雨中搭火車。" },
+        { speaker: "ay 長音A", avatar: "☀️", en: "play, day, say! Let us play outside all day.", zh: "ay 發長音 A：玩耍、白天、說！我們整天在外面玩吧。" },
+        { speaker: "ee / ea 長音E", avatar: "🐝", en: "see, tree, eat! I see a green bee eat a sweet leaf.", zh: "ee/ea 發長音 E：看見、樹、吃！我看見一隻綠蜜蜂吃甜葉子。" },
+        { speaker: "oa / ow 長音O", avatar: "⛵", en: "boat, goat, snow! A goat sails a boat in the snow.", zh: "oa/ow 發長音 O：小船、山羊、雪！山羊在雪中開小船。" },
+        { speaker: "igh 長音I", avatar: "🌟", en: "light, night, bright! Stars shine bright at night.", zh: "igh 發長音 I：光亮、夜晚、明亮！星星在夜晚閃閃發亮。" }
+      ]
+    },
+    {
+      id: "p4", emoji: "🏙️", zh: "4. 軟音 c", en: "Soft C (/s/)",
+      stage: "進階規則：軟音 c",
+      mantra: "💡 口訣：c 遇到 e、i、y，改唸 /s/",
+      examples: "代表例字：city · ice · cycle · pencil · face",
+      lines: [
+        { speaker: "ci 唸 /s/", avatar: "🏙️", en: "city, circle! A big city has a round circle park.", zh: "c 遇 i 唸 /s/：城市、圓形！大城市裡有一座圓形公園。" },
+        { speaker: "ce 唸 /s/", avatar: "🧊", en: "ice, mice, rice! Nice mice eat cold ice and rice.", zh: "c 遇 e 唸 /s/：冰塊、老鼠、米飯！乖老鼠吃冰塊和米飯。" },
+        { speaker: "cy 唸 /s/", avatar: "🚲", en: "cycle, bicycle! I ride my bicycle around the city.", zh: "c 遇 y 唸 /s/：循環、腳踏車！我騎著腳踏車逛城市。" },
+        { speaker: "ce 唸 /s/", avatar: "✏️", en: "pencil, face! Draw a happy face with a yellow pencil.", zh: "c 遇 i/e 唸 /s/：鉛筆、臉蛋！用黃色鉛筆畫一張笑臉。" },
+        { speaker: "ce 唸 /s/", avatar: "💃", en: "dance, prince! The prince loves to dance on ice.", zh: "c 遇 e 唸 /s/：跳舞、王子！王子喜歡在冰上跳舞。" }
+      ]
+    },
+    {
+      id: "p5", emoji: "💎", zh: "5. 軟音 g", en: "Soft G (/dʒ/)",
+      stage: "進階規則：軟音 g（g 遇 e, i, y 常唸 /dʒ/）",
+      mantra: "💡 口訣：g 遇到 e、i、y，常唸 /dʒ/",
+      examples: "代表例字：giant · gem · gym · giraffe · page",
+      lines: [
+        { speaker: "gi 唸 /dʒ/", avatar: "🦕", en: "giant, giraffe! A giant giraffe eats tall green leaves.", zh: "g 遇 i 唸 /dʒ/：巨大的、長頸鹿！巨大的長頸鹿吃高高的綠葉。" },
+        { speaker: "ge 唸 /dʒ/", avatar: "💎", en: "gem, gentle! A gentle queen holds a shiny red gem.", zh: "g 遇 e 唸 /dʒ/：寶石、溫柔的！溫柔的皇后拿著閃亮的紅寶石。" },
+        { speaker: "gy 唸 /dʒ/", avatar: "🤸", en: "gym, energy! Kids jump and run with energy in the gym.", zh: "g 遇 y 唸 /dʒ/：體育館、活力！孩子們在體育館裡充滿活力地跑跳。" },
+        { speaker: "ge 字尾 /dʒ/", avatar: "📖", en: "page, cage, stage! Turn the page of the magic book.", zh: "ge 字尾唸 /dʒ/：書頁、籠子、舞台！翻開魔法書的這一頁。" },
+        { speaker: "ge 唸 /dʒ/", avatar: "🍊", en: "orange, large! Eat a large sweet orange after lunch.", zh: "ge 唸 /dʒ/：柳橙、大的！午餐後吃一顆大又甜的柳橙。" }
+      ]
+    },
+    {
+      id: "p6", emoji: "🦋", zh: "6. 字尾 y", en: "Ending Y (/aɪ/ vs /i/)",
+      stage: "進階規則：字尾 y 的兩種長母音",
+      mantra: "💡 口訣：單音節唸 /aɪ/，多音節唸 /i/",
+      examples: "代表例字：fly · cry · sky / baby · happy · sunny",
+      lines: [
+        { speaker: "單音節 y = /aɪ/", avatar: "🦋", en: "fly, sky, high! Birds fly high in the blue sky.", zh: "單音節字尾 y 唸 /aɪ/：飛、天空、高！小鳥在藍天高高飛翔。" },
+        { speaker: "單音節 y = /aɪ/", avatar: "🏜️", en: "cry, dry, try! Do not cry, wipe your eyes dry and try.", zh: "單音節字尾 y 唸 /aɪ/：哭、乾、嘗試！別哭，擦乾眼淚再試試看。" },
+        { speaker: "多音節 y = /i/", avatar: "👶", en: "baby, lady! The kind lady rocks the sleepy baby.", zh: "多音節字尾 y 唸 /i/：寶寶、女士！善良的女士輕搖愛睏的寶寶。" },
+        { speaker: "多音節 y = /i/", avatar: "😄", en: "happy, puppy! A happy puppy wags his funny tail.", zh: "多音節字尾 y 唸 /i/：快樂、小狗！快樂的小狗搖著有趣的尾巴。" },
+        { speaker: "多音節 y = /i/", avatar: "🌞", en: "sunny, bunny! A little bunny hops on a sunny day.", zh: "多音節字尾 y 唸 /i/：晴朗、小兔！小兔子在晴朗的日子蹦蹦跳。" }
+      ]
+    },
+    {
+      id: "p7", emoji: "🚗", zh: "7. R 控制母音", en: "R-Controlled Vowels",
+      stage: "階段⑤ R控制母音（ar, or, er, ir, ur）",
+      mantra: "💡 口訣：母音遇到 r，聲音全變調（er/ir/ur 同音）",
+      examples: "代表例字：car · star · fork · bird · nurse",
+      lines: [
+        { speaker: "ar 發音", avatar: "🚗", en: "car, star, park! Park the red car under a bright star.", zh: "ar 組合：汽車、星星、公園！把紅車停在明亮的星星下。" },
+        { speaker: "or 發音", avatar: "🍴", en: "fork, corn, horse! A horse eats sweet corn with a fork.", zh: "or 組合：叉子、玉米、馬！一匹馬用叉子吃甜玉米。" },
+        { speaker: "ir 發音", avatar: "🐦", en: "bird, girl, shirt! A little girl sees a blue bird.", zh: "ir 組合：小鳥、女孩、襯衫！小女孩看見一隻藍鳥。" },
+        { speaker: "er 發音", avatar: "👩‍🏫", en: "her, teacher, tiger! Her teacher drew a funny tiger.", zh: "er 組合：她的、老師、老虎！她的老師畫了一隻有趣的老虎。" },
+        { speaker: "ur 發音", avatar: "👩‍⚕️", en: "nurse, turn, purple! The kind nurse wears a purple hat.", zh: "ur 組合：護理師、轉彎、紫色！親切的護理師戴著紫色帽子。" }
+      ]
+    },
+    {
+      id: "p8", emoji: "🚢", zh: "8. 子音組合 Digraphs", en: "Consonant Digraphs",
+      stage: "核心規則：子音組合（sh, ch, th, ph, wh）",
+      mantra: "💡 口訣：sh、ch、th、ph —— 兩個字母、一個音",
+      examples: "代表例字：ship · chat · math · phone · whale",
+      lines: [
+        { speaker: "sh 組合", avatar: "🚢", en: "ship, fish, shop! A big ship sails over the fish.", zh: "sh 發一個音：船、魚、商店！大船從魚群上方航行而過。" },
+        { speaker: "ch 組合", avatar: "🪑", en: "chat, chair, lunch! Sit on a chair and chat at lunch.", zh: "ch 發一個音：聊天、椅子、午餐！坐在椅子上邊吃午餐邊聊天。" },
+        { speaker: "th 組合", avatar: "📐", en: "math, think, bath! Think about math before your bath.", zh: "th 發一個音：數學、思考、洗澡！洗澡前先想想數學題。" },
+        { speaker: "ph 唸 /f/", avatar: "📱", en: "phone, photo, elephant! Take a photo of an elephant with a phone.", zh: "ph 合唸 /f/：電話、照片、大象！用手機幫大象拍張照。" },
+        { speaker: "wh 組合", avatar: "🐳", en: "whale, white, wheel! A huge white whale swims near the wheel.", zh: "wh 組合：鯨魚、白色、輪子！一隻巨大的白鯨在輪子旁游泳。" }
+      ]
+    },
+    {
+      id: "p9", emoji: "🐑", zh: "9. 不發音字母", en: "Silent Letters (kn, wr, mb)",
+      stage: "進階規則：不發音字母",
+      mantra: "💡 口訣：kn、wr、mb —— 其中一個是啞巴",
+      examples: "代表例字：knee · knife · write · lamb · comb",
+      lines: [
+        { speaker: "kn (k 不發音)", avatar: "🦵", en: "knee, knock, know! Knock on the door and bend your knee.", zh: "kn 中 k 是啞巴：膝蓋、敲門、知道！敲敲門並彎彎膝蓋。" },
+        { speaker: "kn (k 不發音)", avatar: "🔪", en: "knife, knight! A brave knight holds a shiny toy knife.", zh: "kn 中 k 是啞巴：刀子、騎士！勇敢的騎士拿著閃亮的玩具刀。" },
+        { speaker: "wr (w 不發音)", avatar: "✍️", en: "write, wrist, wrong! Write your name right with your wrist.", zh: "wr 中 w 是啞巴：寫字、手腕、錯誤！轉動手腕把名字寫正確。" },
+        { speaker: "mb (b 不發音)", avatar: "🐑", en: "lamb, climb! A cute white lamb likes to climb hills.", zh: "mb 中 b 是啞巴：小綿羊、攀爬！可愛的小白羊喜歡爬小山坡。" },
+        { speaker: "mb (b 不發音)", avatar: "🪮", en: "comb, thumb! Hold the blue comb with your thumb.", zh: "mb 中 b 是啞巴：梳子、大拇指！用大拇指拿著藍色梳子。" }
+      ]
+    },
+    {
+      id: "p10", emoji: "👑", zh: "10. qu 永遠是一對", en: "QU Always Together",
+      stage: "核心規則：qu 組合（唸 /kw/）",
+      mantra: "💡 口訣：q 和 u 永遠是一對",
+      examples: "代表例字：queen · quick · quiet · quilt · question",
+      lines: [
+        { speaker: "qu 唸 /kw/", avatar: "👑", en: "queen, crown! The kind queen wears a golden crown.", zh: "qu 組合：皇后、皇冠！善良的皇后戴著金皇冠。" },
+        { speaker: "qu 唸 /kw/", avatar: "⚡", en: "quick, squirrel! A quick squirrel runs up the oak tree.", zh: "qu 組合：快速的、松鼠！敏捷的松鼠快速爬上橡樹。" },
+        { speaker: "qu 唸 /kw/", avatar: "🤫", en: "quiet, mouse! Be as quiet as a sleeping mouse.", zh: "qu 組合：安靜的、老鼠！像睡著的小老鼠一樣安靜。" },
+        { speaker: "qu 唸 /kw/", avatar: "🛏️", en: "quilt, warm! Sleep under a soft colorful quilt.", zh: "qu 組合：拼布被、溫暖！蓋著柔軟多彩的拼布被睡覺。" },
+        { speaker: "qu 唸 /kw/", avatar: "❓", en: "question, quiz! Raise your hand to answer the question.", zh: "qu 組合：問題、小測驗！舉起手來回答這個問題。" }
+      ]
+    },
+    {
+      id: "p11", emoji: "🦀", zh: "11. 子音連綴 Blends", en: "Consonant Blends",
+      stage: "補充規則：子音連綴（各自保留原音快速連讀）",
+      mantra: "💡 口訣：兩個子音各自保留原音，快速滑在一起",
+      examples: "代表例字：blue · crab · stop · green · tree · hand · jump",
+      lines: [
+        { speaker: "bl / fl 連綴", avatar: "🔵", en: "blue, black, flag! Wave the blue and black flag.", zh: "bl/fl 保留原音連讀：藍色、黑色、旗幟！揮動藍黑相間的旗子。" },
+        { speaker: "cr / gr 連綴", avatar: "🦀", en: "crab, green, grass! A red crab walks on green grass.", zh: "cr/gr 保留原音連讀：螃蟹、綠色、草地！紅螃蟹走在綠草地上。" },
+        { speaker: "st / sp 連綴", avatar: "⭐", en: "stop, star, spot! Stop and look at the bright star.", zh: "st/sp 保留原音連讀：停止、星星、斑點！停下來看看明亮的星星。" },
+        { speaker: "tr 連綴", avatar: "🌳", en: "tree, trip, train! Take a fun trip to the big tree.", zh: "tr 保留原音連讀：樹、旅行、火車！來趟去大樹旁的快樂旅行。" },
+        { speaker: "字尾 -nd / -mp", avatar: "🦘", en: "hand, best, jump! Clap your hands and jump your best!", zh: "字尾連綴 -nd/-st/-mp：手、最棒、跳！拍拍手並盡全力跳高！" }
+      ]
+    },
+    {
+      id: "p12", emoji: "🎯", zh: "12. 附件拼讀練習區", en: "Phonics Blending Drill",
+      stage: "學習手冊第 4～5 頁：拼讀練習題庫（1～8題）",
+      mantra: "💡 練習法：先一個音一個音唸出來，再快速滑在一起拼成字！",
+      examples: "手冊題目：cat · hop · ship · cape · rain · car · black · night",
+      lines: [
+        { speaker: "拼讀第 1、2 題", avatar: "1️⃣", en: "c-a-t, cat! h-o-p, hop! A cat can hop.", zh: "第1題 c-a-t → cat（貓）；第2題 h-o-p → hop（單腳跳）。" },
+        { speaker: "拼讀第 3 題", avatar: "3️⃣", en: "s-h-i-p, ship! Sail on a big white ship.", zh: "第3題 s-h-i-p → ship（sh 合成一個音，大船）。" },
+        { speaker: "拼讀第 4 題", avatar: "4️⃣", en: "cap plus e makes cape! Superheroes wear a cape.", zh: "第4題 cap + e → cape（Magic E 讓 a 唸長音，斗篷）。" },
+        { speaker: "拼讀第 5、6 題", avatar: "5️⃣", en: "r-ai-n, rain! c-ar, car! Drive a car in the rain.", zh: "第5題 r-ai-n → rain（雨）；第6題 c-ar → car（汽車）。" },
+        { speaker: "拼讀第 7、8 題", avatar: "7️⃣", en: "b-l-a-ck, black! n-igh-t, night! A black cat at night.", zh: "第7題 b-l-a-ck → black（黑色）；第8題 n-igh-t → night（夜晚）。" }
+      ]
+    }
+  ];
+
   // ==========================================
   // 2. STORAGE & STATE MANAGEMENT
   // ==========================================
   const STORAGE_KEY = 'kids_english_buddy_archive_v1';
   const API_KEY_STORAGE = 'kids_english_buddy_gemini_key';
-  const VOICE_ENGINE_STORAGE = 'kids_english_buddy_voice_engine'; // 'browser' | 'cloud'
+  const VOICE_ENGINE_STORAGE = 'kids_english_buddy_voice_engine';
   const VOICE_PREF_STORAGE = 'kids_english_buddy_voice_uri';
   const CLOUD_VOICE_STORAGE = 'kids_english_buddy_cloud_voice';
   const CLOUD_KEY_STORAGE = 'kids_english_buddy_cloud_tts_key';
   const WORD_PAUSE_STORAGE = 'kids_english_buddy_word_pause';
-  const RETENTION_DAYS = 180; // 半年保存期限
-  const WORD_GAP_MS = 1000;   // 慢速語速單字與單字之間間隔 1 秒
+  const RETENTION_DAYS = 180;
+  const WORD_GAP_MS = 1000;
 
   function buildInitialLessonForDate(dateStr) {
     const d0 = DIALOGUE_TOPICS[0];
     const s0 = STORY_TOPICS[0];
+    const p0 = PHONICS_TOPICS[0];
     return {
       date: dateStr,
       stars: 0,
       selectedDialogueId: d0.id,
       selectedStoryId: s0.id,
+      selectedPhonicsId: p0.id,
       dialogue: {
         title: `日常對話：${d0.zh.replace(/^\d+\.\s*/, '')} ${d0.en}`,
         lines: JSON.parse(JSON.stringify(d0.lines))
@@ -1619,14 +1846,29 @@
       story: {
         title: `經典童話：${s0.zh.replace(/^\d+\.\s*/, '')} ${s0.en}`,
         lines: JSON.parse(JSON.stringify(s0.lines))
+      },
+      phonics: {
+        title: `自然發音：${p0.zh.replace(/^\d+\.\s*/, '')} ${p0.en}`,
+        lines: JSON.parse(JSON.stringify(p0.lines))
       }
     };
   }
 
+  function ensureLessonStructure(lesson, dateStr) {
+    const base = buildInitialLessonForDate(dateStr);
+    if (!lesson.dialogue) lesson.dialogue = base.dialogue;
+    if (!lesson.story) lesson.story = base.story;
+    if (!lesson.phonics) {
+      lesson.phonics = base.phonics;
+      lesson.selectedPhonicsId = base.selectedPhonicsId;
+    }
+    return lesson;
+  }
+
   let archiveData = {};
   let activeDate = getTodayStr();
-  let currentMode = 'dialogue'; // 'dialogue' | 'story'
-  let currentTopicRange = 'all'; // 'all' | '1-15' | '16-30'
+  let currentMode = 'dialogue';
+  let currentTopicRange = 'all';
   let currentIndex = 0;
   let showZh = true;
   let isPickerOpen = true;
@@ -1658,6 +1900,8 @@
     if (!archiveData[activeDate]) {
       archiveData[activeDate] = buildInitialLessonForDate(activeDate);
       saveArchive();
+    } else {
+      archiveData[activeDate] = ensureLessonStructure(archiveData[activeDate], activeDate);
     }
   }
 
@@ -1686,7 +1930,7 @@
     if (!archiveData[activeDate]) {
       archiveData[activeDate] = buildInitialLessonForDate(activeDate);
     }
-    return archiveData[activeDate];
+    return ensureLessonStructure(archiveData[activeDate], activeDate);
   }
 
   function getCurrentLines() {
@@ -1699,14 +1943,17 @@
     if (currentMode === 'dialogue') {
       const id = lesson.selectedDialogueId || 'd1';
       return DIALOGUE_TOPICS.find(t => t.id === id) || DIALOGUE_TOPICS[0];
-    } else {
+    } else if (currentMode === 'story') {
       const id = lesson.selectedStoryId || 's1';
       return STORY_TOPICS.find(t => t.id === id) || STORY_TOPICS[0];
+    } else {
+      const id = lesson.selectedPhonicsId || 'p1';
+      return PHONICS_TOPICS.find(t => t.id === id) || PHONICS_TOPICS[0];
     }
   }
 
   // ==========================================
-  // 3. 30-TOPIC PICKER RENDER & SELECTION
+  // 3. TOPIC PICKER RENDER & SELECTION
   // ==========================================
   function setTopicRange(range) {
     currentTopicRange = range;
@@ -1722,22 +1969,41 @@
     const keyword = (document.getElementById('topicSearchInput')?.value || '').trim().toLowerCase();
     const activeTopic = getActiveTopicMeta();
 
-    const sourceList = currentMode === 'dialogue' ? DIALOGUE_TOPICS : STORY_TOPICS;
+    const isPhonics = currentMode === 'phonics';
+    document.getElementById('btnRangeAll').style.display = isPhonics ? 'none' : 'inline-block';
+    document.getElementById('btnRange1').style.display = isPhonics ? 'none' : 'inline-block';
+    document.getElementById('btnRange2').style.display = isPhonics ? 'none' : 'inline-block';
+
+    const sourceList = currentMode === 'dialogue'
+      ? DIALOGUE_TOPICS
+      : currentMode === 'story'
+        ? STORY_TOPICS
+        : PHONICS_TOPICS;
 
     let rangedList = sourceList;
-    if (!keyword) {
+    if (!keyword && !isPhonics) {
       if (currentTopicRange === '1-15') rangedList = sourceList.slice(0, 15);
       else if (currentTopicRange === '16-30') rangedList = sourceList.slice(15, 30);
     }
 
     const filteredList = keyword
-      ? sourceList.filter(t => t.zh.toLowerCase().includes(keyword) || t.en.toLowerCase().includes(keyword))
+      ? sourceList.filter(t =>
+          t.zh.toLowerCase().includes(keyword) ||
+          t.en.toLowerCase().includes(keyword) ||
+          (t.mantra && t.mantra.toLowerCase().includes(keyword)) ||
+          (t.examples && t.examples.toLowerCase().includes(keyword))
+        )
       : rangedList;
 
     if (currentMode === 'dialogue') {
       titleEl.textContent = `💬 請點選 1 種生活情境（目前顯示 ${filteredList.length} / ${DIALOGUE_TOPICS.length} 種）`;
-    } else {
+      gridEl.className = 'topic-grid';
+    } else if (currentMode === 'story') {
       titleEl.textContent = `📖 請點選 1 篇經典童話故事（目前顯示 ${filteredList.length} / ${STORY_TOPICS.length} 篇）`;
+      gridEl.className = 'topic-grid';
+    } else {
+      titleEl.textContent = `🔤 自然發音規則總表（十條口訣規則 ＋ 連綴與拼讀練習，共 ${filteredList.length} 類）`;
+      gridEl.className = 'topic-grid phonics-grid';
     }
 
     if (filteredList.length === 0) {
@@ -1746,7 +2012,7 @@
     }
 
     gridEl.innerHTML = filteredList.map(t => `
-      <button type="button" class="topic-chip ${t.id === activeTopic.id ? 'selected' : ''}" data-topic-id="${t.id}" onclick="selectTopic('${t.id}')">
+      <button type="button" class="topic-chip ${isPhonics ? 'phonics-chip' : ''} ${t.id === activeTopic.id ? 'selected' : ''}" data-topic-id="${t.id}" onclick="selectTopic('${t.id}')">
         <span class="t-emoji">${t.emoji}</span>
         <span class="t-zh">${escapeHtml(t.zh)}</span>
         <span class="t-en">${escapeHtml(t.en)}</span>
@@ -1763,7 +2029,7 @@
   function toggleTopicPicker() {
     isPickerOpen = !isPickerOpen;
     document.getElementById('topicPickerCard').style.display = isPickerOpen ? 'block' : 'none';
-    document.getElementById('btnTogglePicker').textContent = isPickerOpen ? '📋 收合主題選單' : '📋 挑選主題 (30選1)';
+    document.getElementById('btnTogglePicker').textContent = isPickerOpen ? '📋 收合主題選單' : '📋 挑選主題 / 發音規則';
   }
 
   function selectTopic(topicId) {
@@ -1778,12 +2044,20 @@
         title: `日常對話：${chosen.zh.replace(/^\d+\.\s*/, '')} ${chosen.en}`,
         lines: JSON.parse(JSON.stringify(chosen.lines))
       };
-    } else {
+    } else if (currentMode === 'story') {
       const chosen = STORY_TOPICS.find(t => t.id === topicId);
       if (!chosen) return;
       lesson.selectedStoryId = chosen.id;
       lesson.story = {
         title: `經典童話：${chosen.zh.replace(/^\d+\.\s*/, '')} ${chosen.en}`,
+        lines: JSON.parse(JSON.stringify(chosen.lines))
+      };
+    } else {
+      const chosen = PHONICS_TOPICS.find(t => t.id === topicId);
+      if (!chosen) return;
+      lesson.selectedPhonicsId = chosen.id;
+      lesson.phonics = {
+        title: `自然發音：${chosen.zh.replace(/^\d+\.\s*/, '')} ${chosen.en}`,
         lines: JSON.parse(JSON.stringify(chosen.lines))
       };
     }
@@ -1797,7 +2071,7 @@
     const activeTopic = getActiveTopicMeta();
     setStatus(
       `✅ 已切換至「${activeTopic.zh.replace(/^\d+\.\s*/, '')} (${activeTopic.en})」`,
-      '按「▶️ 開始朗讀」開始練習，或按「✨ AI 生成此主題新內容」變換新句子！',
+      '按「▶️ 開始朗讀」開始跟讀練習，或按「✨ AI 生成此主題新內容」變換新字例！',
       'success'
     );
 
@@ -2035,7 +2309,8 @@
         renderSentence(null, i);
       }
 
-      const ok = await speakEnglish(words[i], rate, token, overrideEngine, overrideVoice, overrideKey);
+      const cleanWordForSpeech = words[i].replace(/-/g, '');
+      const ok = await speakEnglish(cleanWordForSpeech, rate, token, overrideEngine, overrideVoice, overrideKey);
       if (!ok || token !== loopToken) return false;
 
       if (i < words.length - 1) {
@@ -2061,11 +2336,25 @@
     const section = lesson[currentMode];
     const line = section.lines[currentIndex];
 
-    document.getElementById('lessonTitle').textContent = `${activeDate} · ${section.title}`;
+    const badgeEl = document.getElementById('lessonTitle');
+    badgeEl.textContent = `${activeDate} · ${section.title}`;
+    badgeEl.className = currentMode === 'phonics' ? 'badge phonics-badge' : 'badge';
+
     document.getElementById('sentenceProgress').textContent = `第 ${currentIndex + 1} / ${section.lines.length} 句`;
     document.getElementById('speakerAvatar').textContent = line.avatar || '🧸';
     document.getElementById('speakerName').textContent = line.speaker || 'Reader';
     document.getElementById('starsCounter').textContent = `⭐ 獲得星星：${lesson.stars || 0}`;
+
+    const ruleBox = document.getElementById('phonicsRuleBox');
+    if (currentMode === 'phonics') {
+      const pTopic = getActiveTopicMeta();
+      ruleBox.style.display = 'block';
+      document.getElementById('phonicsStageText').textContent = pTopic.stage || '自然發音規則';
+      document.getElementById('phonicsMantraText').textContent = pTopic.mantra || '';
+      document.getElementById('phonicsExampleText').textContent = pTopic.examples || '';
+    } else {
+      ruleBox.style.display = 'none';
+    }
 
     const enContainer = document.getElementById('englishText');
     const words = line.en.split(/\s+/);
@@ -2106,12 +2395,13 @@
     currentIndex = 0;
     document.getElementById('btnModeDialog').classList.toggle('active', mode === 'dialogue');
     document.getElementById('btnModeStory').classList.toggle('active', mode === 'story');
+    document.getElementById('btnModePhonics').classList.toggle('active', mode === 'phonics');
     clearTopicSearch();
     setStepHighlight(0);
     renderTopicPicker();
     renderSentence();
     const activeTopic = getActiveTopicMeta();
-    setStatus(`目前主題：${activeTopic.zh.replace(/^\d+\.\s*/, '')} (${activeTopic.en})`, '可在上方點選其他主題，或直接按「▶️ 開始朗讀」');
+    setStatus(`目前主題：${activeTopic.zh.replace(/^\d+\.\s*/, '')} (${activeTopic.en})`, '可在上方點選其他規則或主題，或直接按「▶️ 開始朗讀」');
   }
 
   function switchView(view) {
@@ -2146,7 +2436,7 @@
       startSentenceLoop();
     } else {
       setStepHighlight(7);
-      setStatus('🎉 太棒了！你已經完成本篇所有句子的跟讀練習！', '可以在上方挑選下一個生活情境或故事繼續挑戰喔！', 'success');
+      setStatus('🎉 太棒了！你已經完成本篇所有句子的跟讀練習！', '可以在上方挑選下一個規則、生活情境或故事繼續挑戰喔！', 'success');
       playChime(true);
     }
   }
@@ -2490,7 +2780,7 @@
   async function generateNewDailyLesson() {
     const apiKey = localStorage.getItem(API_KEY_STORAGE);
     if (!apiKey) {
-      alert('請先點擊右上角「⚙️ 設定與語音」輸入您的 Gemini API Key，即可依所選主題生成全新對話與童話！');
+      alert('請先點擊右上角「⚙️ 設定與語音」輸入您的 Gemini API Key，即可依所選主題或發音規則生成全新內容！');
       openSettings();
       return;
     }
@@ -2502,10 +2792,11 @@
     const btn = document.getElementById('btnGenerate');
     btn.disabled = true;
     btn.textContent = '⏳ AI 正在編寫中...';
-    setStatus(`✨ Gemini 正在為主題「${topicCleanZh} (${activeTopic.en})」編寫全新句子...`, '請稍候約 5～10 秒');
+    setStatus(`✨ Gemini 正在為「${topicCleanZh} (${activeTopic.en})」編寫全新練習內容...`, '請稍候約 5～10 秒');
 
-    const prompt = currentMode === 'dialogue'
-      ? `Create a brand-new, cheerful 5-line everyday English conversation for a US Kindergarten child (ages 5-7) specifically about the situation: "${activeTopic.en}" (${topicCleanZh}).
+    let prompt = '';
+    if (currentMode === 'dialogue') {
+      prompt = `Create a brand-new, cheerful 5-line everyday English conversation for a US Kindergarten child (ages 5-7) specifically about the situation: "${activeTopic.en}" (${topicCleanZh}).
 Return ONLY valid JSON with this exact schema:
 {
   "title": "日常對話：${topicCleanZh} ${activeTopic.en} (AI新編)",
@@ -2513,8 +2804,9 @@ Return ONLY valid JSON with this exact schema:
     { "speaker": "Character Name", "avatar": "single emoji", "en": "Short simple English sentence (4-8 words).", "zh": "繁體中文翻譯" }
   ]
 }
-Requirements: Exactly 5 lines, simple kindergarten vocabulary, natural conversational flow.`
-      : `Adapt the classic fairy tale "${activeTopic.en}" (${topicCleanZh}) into a fresh, gentle 5-sentence read-aloud story for a US Kindergarten child (ages 5-7).
+Requirements: Exactly 5 lines, simple kindergarten vocabulary, natural conversational flow.`;
+    } else if (currentMode === 'story') {
+      prompt = `Adapt the classic fairy tale "${activeTopic.en}" (${topicCleanZh}) into a fresh, gentle 5-sentence read-aloud story for a US Kindergarten child (ages 5-7).
 Return ONLY valid JSON with this exact schema:
 {
   "title": "經典童話：${topicCleanZh} ${activeTopic.en} (AI新編)",
@@ -2523,6 +2815,17 @@ Return ONLY valid JSON with this exact schema:
   ]
 }
 Requirements: Exactly 5 lines, simple kindergarten vocabulary, heartwarming tone.`;
+    } else {
+      prompt = `Create a brand-new 5-item English Phonics practice set for young learners (ages 5-7) focusing strictly on the phonics rule: "${activeTopic.en}" (${topicCleanZh} - ${activeTopic.mantra}).
+Return ONLY valid JSON with this exact schema:
+{
+  "title": "自然發音：${topicCleanZh} ${activeTopic.en} (AI新編)",
+  "lines": [
+    { "speaker": "Focus sound label in Traditional Chinese", "avatar": "single emoji", "en": "word1, word2, word3! A short fun rhyming sentence using those target phonics words.", "zh": "繁體中文發音提示與句子翻譯" }
+  ]
+}
+Requirements: Exactly 5 lines, every line must showcase 3 target words matching "${activeTopic.en}" followed by a simple 4-7 word sentence.`;
+    }
 
     try {
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`, {
@@ -2562,10 +2865,16 @@ Requirements: Exactly 5 lines, simple kindergarten vocabulary, heartwarming tone
           title: parsed.title || `日常對話：${topicCleanZh} ${activeTopic.en}`,
           lines: parsed.lines
         };
-      } else {
+      } else if (currentMode === 'story') {
         archiveData[today].selectedStoryId = activeTopic.id;
         archiveData[today].story = {
           title: parsed.title || `經典童話：${topicCleanZh} ${activeTopic.en}`,
+          lines: parsed.lines
+        };
+      } else {
+        archiveData[today].selectedPhonicsId = activeTopic.id;
+        archiveData[today].phonics = {
+          title: parsed.title || `自然發音：${topicCleanZh} ${activeTopic.en}`,
           lines: parsed.lines
         };
       }
@@ -2596,13 +2905,14 @@ Requirements: Exactly 5 lines, simple kindergarten vocabulary, heartwarming tone
     }
 
     listEl.innerHTML = dates.map(d => {
-      const item = archiveData[d];
+      const item = ensureLessonStructure(archiveData[d], d);
       return `
         <div class="archive-item">
           <div class="archive-info">
             <h3>📅 ${escapeHtml(d)} ${d === getTodayStr() ? '<span class="badge">今天</span>' : ''}</h3>
             <p>💬 ${escapeHtml(item.dialogue?.title || '')}</p>
             <p>📖 ${escapeHtml(item.story?.title || '')}</p>
+            <p>🔤 ${escapeHtml(item.phonics?.title || '')}</p>
             <p style="color:#D97706; font-weight:bold; margin-top:4px;">⭐ 累積星星：${item.stars || 0}</p>
           </div>
           <button type="button" class="btn-large btn-start" style="padding:10px 16px; font-size:0.95rem;" onclick="loadArchiveDate('${escapeHtml(d)}')">
@@ -2779,9 +3089,9 @@ Requirements: Exactly 5 lines, simple kindergarten vocabulary, heartwarming tone
       osc.connect(gain);
       gain.connect(ctx.destination);
       if (isSuccess) {
-        osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
-        osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.12); // E5
-        osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.24); // G5
+        osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+        osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.12);
+        osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.24);
       } else {
         osc.frequency.setValueAtTime(330, ctx.currentTime);
         osc.frequency.setValueAtTime(293.66, ctx.currentTime + 0.15);
